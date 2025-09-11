@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7586348987164639371}
   - component: {fileID: 2493205721374892299}
   m_Layer: 0
-  m_Name: position-selector
+  m_Name: Position_Selector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
