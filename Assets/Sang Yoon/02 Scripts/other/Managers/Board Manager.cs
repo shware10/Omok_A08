@@ -5,25 +5,25 @@ public class BoardManager : MonoBehaviour
     public enum CellState { Empty, Black, White }
 
     [Header("Board")]
-    [SerializeField] int rows = 15;
-    [SerializeField] int cols = 15;
-    [SerializeField] float cellSize = 0.642f;                 // 칸 한 변 길이
-    [SerializeField] Transform origin;                    // 보드 좌하단 월드 좌표
-    [SerializeField] bool use2D = true;                   // 2D(Physics2D) / 3D(Physics) 선택
+    [SerializeField] private int rows = 15;
+    [SerializeField] private int cols = 15;
+    [SerializeField] private float cellSize = 0.642f;             // 보드 칸 한 변 길이
+    [SerializeField] private Transform origin;                    // 보드 좌하단기준 그리드
+    [SerializeField] private bool use2D = true;                   // 2D(Physics2D) / 3D(Physics) 선택
 
     [Header("Prefabs & Parents")]
-    [SerializeField] GameObject blackStonePrefab;
-    [SerializeField] GameObject whiteStonePrefab;
-    [SerializeField] Transform stonesParent;              // 인스턴스 부모(정리용, 선택)
+    [SerializeField] private GameObject blackStonePrefab;
+    [SerializeField] private GameObject whiteStonePrefab;
+    [SerializeField] private Transform stonesParent;              // 인스턴스 프리팹 부모(흑돌, 백돌 등등)
 
     [Header("Collision")]
-    [SerializeField] Collider2D boardCollider2D;          // 2D일 때 할당
-    [SerializeField] Collider boardCollider3D;            // 3D일 때 할당
-    [SerializeField] LayerMask boardMask = ~0;            // 3D Raycast 용
+    [SerializeField] private Collider2D boardCollider2D;          // 2D일 때 할당
+    [SerializeField] private Collider boardCollider3D;            // 3D일 때 할당
+    [SerializeField] private LayerMask boardMask = ~0;            // 3D Raycast 용
 
     Camera cam;
     CellState[,] board;
-    CellState turn = CellState.Black;                     // 흑 선공
+    CellState turn = CellState.Black;                             // 처음 시작시 흑이 시작
 
     void Awake()
     {
@@ -48,6 +48,10 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 해당 칸이 빈칸인지 먼저 확인하기위한 기능
+    /// </summary>
+    /// <param name="screenPos"></param>
     void TryPlaceAtPointer(Vector2 screenPos)
     {
         if (!TryGetWorldPoint(screenPos, out var worldPoint))
@@ -55,19 +59,25 @@ public class BoardManager : MonoBehaviour
         if (!TryGetCell(worldPoint, out var cell)) 
             return;
 
-        // (나중에) 렌주룰 33/44 체크 지점
-        // if (!RuleValidator.IsLegal(board, cell, turn)) { ShowIllegalFx(); return; }
+        // 렌주룰 33/44 체크 지점-------------------------------------------------------------------------------------- ✔✔✔✔✔✔✔✔
 
         PlaceStone(cell);
     }
 
+    /// <summary>
+    /// 스크린 → 월드 좌표 변환 및 보드내부만 클릭 허용
+    /// </summary>
+    /// <param name="screenPos"></param>
+    /// <param name="worldPoint"></param>
+    /// <returns></returns>
     bool TryGetWorldPoint(Vector2 screenPos, out Vector3 worldPoint)
     {
         worldPoint = default;
 
         if (use2D)
         {
-            // 2D(Orthographic) : 스크린→월드 변환 뒤 보드 콜라이더 내부만 허용
+            // 2D : 스크린 좌표 → 월드 좌표 변환
+            // 보드 콜라이더 내부만 허용
             var wp = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
             if (boardCollider2D != null && !boardCollider2D.OverlapPoint(wp)) 
                 return false;
@@ -77,7 +87,7 @@ public class BoardManager : MonoBehaviour
         }
         else
         {
-            // 3D : 보드로 Raycast
+            // 3D전환시에 레이케스트
             Ray ray = cam.ScreenPointToRay(screenPos);
             if (Physics.Raycast(ray, out var hit, 1000f, boardMask))
             {
@@ -150,7 +160,7 @@ public class BoardManager : MonoBehaviour
         board[cell.x, cell.y] = turn;
         turn = (turn == CellState.Black) ? CellState.White : CellState.Black;
 
-        // 승, 패 로직 추가 위치!!! (아마도 여기일겁니다...?)
+        // 승, 패 로직 추가 위치!!! (아마도 여기일겁니다...?)-------------------------------------------------------------------- ✔✔✔✔✔
     }
     #endregion
 
