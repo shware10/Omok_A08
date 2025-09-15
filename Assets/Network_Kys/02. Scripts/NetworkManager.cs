@@ -17,9 +17,22 @@ public class NetworkManager : MonoBehaviour
     private List<byte> incomplete_packet_buffer = new List<byte>();
     private readonly object packetBufferLock = new object();
 
+    Action<byte[]>[] recv_act_lookup_arr;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        this.recv_act_lookup_arr = new Action<byte[]>[]{
+            Handle_Room_Response,
+            Handle_Room_Create,
+            Handle_Room_Join,
+            Handle_Room_Exit,
+            Handle_Game_DO,
+            Handle_Game_Result,
+            Handle_Game_Start
+        };
+
+
         ConnectServer();
     }
 
@@ -175,37 +188,8 @@ public class NetworkManager : MonoBehaviour
             {
                 main_thread_actions.Enqueue(() =>
                 {
-                    switch ((PROTOCOL)protocol)
-                    {
-                        case PROTOCOL.ROOM_REQUEST:
-                            Debug.Log("Room_Res");
-                            Handle_Room_Response(completed_message_body);
-                            break;
-                        case PROTOCOL.ROOM_CREATE:
-                            Debug.Log("ROOM_CREATE_RESULT");
-                            Handle_Room_Create(completed_message_body);
-                            break;
-                        case PROTOCOL.ROOM_JOIN:
-                            Handle_Room_Join(completed_message_body);
-                            Debug.Log("ROOM_Join");
-                            break;
-                        case PROTOCOL.ROOM_EXIT:
-                            Debug.Log("ROOM_EXIT_RESULT");
-                            Handle_Room_Exit(completed_message_body);
-                            break;
-                        case PROTOCOL.GAME_START:
-                            Handle_Game_Start(completed_message_body);
-                            Debug.Log("ROOM_Game_Start");
-                            break;
-                        case PROTOCOL.GAME_DO:
-                            Debug.Log("GAME_DO");
-                            Handle_Game_DO(completed_message_body);
-                            break;
-                        case PROTOCOL.GAME_WIN:
-                            Debug.Log("GAME_WIN");
-                            Handle_Game_Result(completed_message_body);
-                            break;
-                    }
+                    // 룩업 배열 함수 실행
+                    this.recv_act_lookup_arr[protocol]?.Invoke(completed_message_body);
                 });
             }
         }
@@ -265,6 +249,7 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    // 
     public void Send_Get_Room()
     {
         Packet packet = new Packet(PROTOCOL.ROOM_REQUEST);
@@ -302,37 +287,37 @@ public class NetworkManager : MonoBehaviour
 
     private void Handle_Room_Response(byte[] data)
     {
-
+        Debug.Log("방 목록 받음");
     }
 
     private void Handle_Room_Create(byte[] data)
     {
-
+        Debug.Log("방 생성 요청 ACK 받음");
     }
 
 
     private void Handle_Room_Join(byte[] data)
     {
-
+        Debug.Log("방 참가 요청 ACK 받음");
     }
 
     private void Handle_Room_Exit(byte[] data)
     {
-
+        Debug.Log("방 퇴장 요청 ACK 받음");
     }
     private void Handle_Game_Start(byte[] data)
     {
-
+        Debug.Log("방 게임 시작 요청 받음");
     }
 
     private void Handle_Game_DO(byte[] data)
     {
-
+        Debug.Log("상대방 턴 완료 Alert 받음");
     }
 
     private void Handle_Game_Result(byte[] data)
     {
-
+        Debug.Log("게임종료 Alert 받음");
     }
 
 }

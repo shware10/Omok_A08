@@ -5,7 +5,7 @@ public enum PROTOCOL : ushort
     ROOM_JOIN,         // 방 참가
     ROOM_EXIT,         // 방 퇴장
     GAME_DO,           // 상대방 착수 결과
-    GAME_WIN,           // 상대방 승리 Alert
+    GAME_WIN,          // 상대방 승리 Alert
     GAME_START,        // 게임 시작
 }
 
