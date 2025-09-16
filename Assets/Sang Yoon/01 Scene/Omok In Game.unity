@@ -288,6 +288,7 @@ Transform:
   - {fileID: 969276012}
   - {fileID: 1038405135}
   - {fileID: 1590088120}
+  - {fileID: 1937277402}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &772165894
@@ -478,45 +479,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3935226699236872829, guid: 18c6360608bbcd349abf56b24b7125cc, type: 3}
   m_PrefabInstance: {fileID: 3394568595264620053}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &969276013
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 969276010}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da407c5aabfd2114ea3fa110c7e5aad4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cell: 0
-  cam: {fileID: 0}
---- !u!114 &969276015
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 969276010}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75f0c23ebb0e25849ba370dbc979337d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rows: 15
-  cols: 15
-  cellSize: 1
-  origin: {fileID: 0}
-  use2D: 1
-  blackStonePrefab: {fileID: 0}
-  whiteStonePrefab: {fileID: 0}
-  stonesParent: {fileID: 0}
-  boardCollider2D: {fileID: 0}
-  boardCollider3D: {fileID: 0}
-  boardMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!61 &969276017
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -940,7 +902,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1590088120}
-  - component: {fileID: 1590088121}
   m_Layer: 0
   m_Name: Collider2d
   m_TagString: Untagged
@@ -963,31 +924,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 710907310}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1590088121
+--- !u!1 &1937277401
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1937277402}
+  - component: {fileID: 1937277403}
+  m_Layer: 0
+  m_Name: Renju Rule Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1937277402
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937277401}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.0465515, y: 10.309797, z: -0.17336889}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 710907310}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1937277403
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1590088118}
-  m_Enabled: 0
+  m_GameObject: {fileID: 1937277401}
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75f0c23ebb0e25849ba370dbc979337d, type: 3}
+  m_Script: {fileID: 11500000, guid: aaf031439922e1a4f844b3675f1b1c34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rows: 15
-  cols: 15
-  cellSize: 0.642
-  origin: {fileID: 1590088120}
-  use2D: 1
-  blackStonePrefab: {fileID: 990445662032146513, guid: 8aaf5f96db6b85a4c8cd6d08b2e4b3d8, type: 3}
-  whiteStonePrefab: {fileID: 6433326866901413629, guid: 2939b6f3e37eb544092a48edb62b0e24, type: 3}
-  stonesParent: {fileID: 1038405135}
-  boardCollider2D: {fileID: 969276017}
-  boardCollider3D: {fileID: 0}
-  boardMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1 &2111359859
 GameObject:
   m_ObjectHideFlags: 0
@@ -1154,12 +1134,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4300783728718125037, guid: 18c6360608bbcd349abf56b24b7125cc, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 969276013}
-    - targetCorrespondingSourceObject: {fileID: 4300783728718125037, guid: 18c6360608bbcd349abf56b24b7125cc, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 969276015}
     - targetCorrespondingSourceObject: {fileID: 4300783728718125037, guid: 18c6360608bbcd349abf56b24b7125cc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 969276017}
