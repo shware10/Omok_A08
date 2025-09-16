@@ -1,14 +1,16 @@
 using UnityEngine;
+using System.Collections;
+
+
 
 public class OmokManager_AI : MonoBehaviour, IGameStateListener
 {
     public static OmokManager_AI Instance;
-    public const int N = 15;
+    public int N = 15;
 
     public GameState curState;
 
     public Board_AI board;
-    public Cell_AI[,] cells;
 
     StoneState selectedStone;
     Player_AI player;
@@ -18,6 +20,10 @@ public class OmokManager_AI : MonoBehaviour, IGameStateListener
 
     public delegate void OnGameStateChanged(GameState state);
     public event OnGameStateChanged OnStateChanged;
+
+    public delegate void OnBoardStateChanged(int x, int y, StoneState curStone);
+    public event OnBoardStateChanged OnBoardChanged;
+
     public void SetState(GameState newState)
     {
         curState = newState;
@@ -27,19 +33,15 @@ public class OmokManager_AI : MonoBehaviour, IGameStateListener
     void Start()
     {
         board = new Board_AI(15);
-        Cell_AI[] cellArray = transform.GetComponentsInChildren<Cell_AI>();
-        for(int i = 0; i < cellArray.Length; ++i)
-            for(int j = 0; j < cell)
-        
     }
 
     void LoopStart()
     {
         SetState(GameState.None);
-        StartCoroutine(GameLoop());
+        StartCoroutine(nameof(GameLoop));
     }
 
-    IEnumrator GameLoop()
+    IEnumerator GameLoop()
     {
         while(curState == GameState.None)
         {
@@ -61,9 +63,9 @@ public class OmokManager_AI : MonoBehaviour, IGameStateListener
         StoneState curStone = (StoneState)(turn % 2);
         if (!board.TryPlace(x, y, curStone)) return;
 
-        cells[x, y].ActivateStone(curStone);
+        OnBoardChanged?.Invoke(x, y, curStone);
 
-        if(board.IsFive(x,y,curStone))
+        if (board.IsFive(x,y,curStone))
         {
             if(curStone == StoneState.White) SetState(GameState.WhiteWin);
             else SetState(GameState.BlackWin);
