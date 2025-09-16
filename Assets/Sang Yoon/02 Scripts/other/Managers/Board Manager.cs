@@ -5,10 +5,10 @@ public class BoardManager : MonoBehaviour
     public enum CellState { Empty, Black, White }
 
     [Header("Board")]
-    [SerializeField] private int rows = 15;
-    [SerializeField] private int cols = 15;
+    [SerializeField] private int rows = 15;                       // 좌우 행열 크기
+    [SerializeField] private int cols = 15;                       // 좌우 행열 크기
     [SerializeField] private float cellSize = 0.642f;             // 보드 칸 한 변 길이
-    [SerializeField] private Transform origin;                    // 보드 좌하단기준 그리드
+    [SerializeField] private Transform origin;                    // 보드 좌하단기준 그리드 위치
     [SerializeField] private bool use2D = true;                   // 2D(Physics2D) / 3D(Physics) 선택
 
     [Header("Prefabs & Parents")]
@@ -22,7 +22,7 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private LayerMask boardMask = ~0;            // 3D Raycast 용
 
     Camera cam;
-    CellState[,] board;
+    public CellState[,] board;
     CellState turn = CellState.Black;                             // 처음 시작시 흑이 시작
 
     void Awake()
@@ -31,21 +31,17 @@ public class BoardManager : MonoBehaviour
         board = new CellState[rows, cols];
         if (origin == null) origin = transform;
         if (stonesParent == null) stonesParent = transform;
+
+        if (RenjuRule.Instance != null)
+        {
+            RenjuRule.Instance.Initialize(board, rows, cols);
+        }
     }
 
     void Update()
     {
-        // 마우스 클릭
         if (Input.GetMouseButtonDown(0))
             TryPlaceAtPointer(Input.mousePosition);
-
-        // 모바일 터치
-        if (Input.touchCount > 0)
-        {
-            var t = Input.GetTouch(0);
-            if (t.phase == TouchPhase.Began)
-                TryPlaceAtPointer(t.position);
-        }
     }
 
     /// <summary>
@@ -54,12 +50,22 @@ public class BoardManager : MonoBehaviour
     /// <param name="screenPos"></param>
     void TryPlaceAtPointer(Vector2 screenPos)
     {
+        // 게임이 끝나면 상호작용 없애야함
+
         if (!TryGetWorldPoint(screenPos, out var worldPoint))
             return;
         if (!TryGetCell(worldPoint, out var cell)) 
             return;
 
-        // 렌주룰 33/44 체크 지점-------------------------------------------------------------------------------------- ✔✔✔✔✔✔✔✔
+        if (turn == CellState.Black)
+        {
+            if (RenjuRule.Instance.IsForbiddenBlackRock(cell.x, cell.y))
+            {
+                Debug.Log("해당 위치는 금수입니다");
+                // 금수 텍스트 UI 로직 위치???
+                return;
+            }
+        }
 
         PlaceStone(cell);
     }
@@ -190,3 +196,12 @@ public class BoardManager : MonoBehaviour
     }
     #endregion
 }
+
+// 모바일 터치가 필요하다면 Update문에 추가 하면됩니다.
+
+//if (Input.touchCount > 0)
+//{
+//    var t = Input.GetTouch(0);
+//    if (t.phase == TouchPhase.Began)
+//        TryPlaceAtPointer(t.position);
+//}
