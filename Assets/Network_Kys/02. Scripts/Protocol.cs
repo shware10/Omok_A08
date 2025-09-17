@@ -15,3 +15,10 @@ public enum GameResultState : byte
     Lose,
     Draw
 }
+
+
+public enum ResponseType : int{
+  INVALID_USERNAME = 0,
+  INVALID_PASSWORD ,
+  SUCCESS ,
+}
