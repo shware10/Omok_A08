@@ -1,11 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Networking;
 
-public class NetworkManager : MonoBehaviour
+public class NetworkManager : Singleton<NetworkManager>
 {
     private Socket client_socket;
 
@@ -31,9 +32,6 @@ public class NetworkManager : MonoBehaviour
             Handle_Game_Result,
             Handle_Game_Start
         };
-
-
-        ConnectServer();
     }
 
     void Update()
@@ -46,49 +44,189 @@ public class NetworkManager : MonoBehaviour
                 act?.Invoke();
             }
         }
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            this.Send_Get_Room();
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            this.Send_Room_Crate();
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            this.Send_Room_Join(1000);
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            this.Send_Room_Exit();
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            this.Send_Game_Do(2, 5);
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            this.Send_Game_Result(GameResultState.Win);
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            Disconnect();
-        }
 
+        // #region 테스트 인풋
+        // if (Input.GetKeyDown(KeyCode.Q))
+        // {
+        //     SignupData temp = new SignupData("test04", "test1234");
+        //     StartCoroutine(Signup(temp,
+        //     () =>
+        //     {
+        //         Debug.Log("회원 가입 성공");
+        //     },
+        //     (response) =>
+        //     {
+        //         if (response == (int)ResponseType.INVALID_USERNAME)
+        //         {
+        //             Debug.Log($"회원 가입 실패 : 이미 존재하는 사용자입니다.");
+        //         }
+        //     }));
+
+        // }
+        // if (Input.GetKeyDown(KeyCode.W))
+        // {
+        //     SigninData temp = new SigninData("test05", "test1234");
+        //     StartCoroutine(Signin(temp,
+        //     () =>
+        //     {
+        //         Debug.Log("로그인 성공");
+        //     },
+        //      (response) =>
+        //      {
+        //          string log = "";
+
+        //          if (response == (int)ResponseType.INVALID_USERNAME)
+        //          {
+        //              log = "ID가 유효하지 않습니다.";
+        //          }
+        //          else if (response == (int)ResponseType.INVALID_PASSWORD)
+        //          {
+        //              log = "비밀번호가 유효하지 않습니다.";
+        //          }
+
+        //          Debug.Log(log);
+        //      }));
+
+        // }
+        // if (Input.GetKeyDown(KeyCode.E))
+        // {
+        //     this.Send_Room_Join(1000);
+        // }
+        // if (Input.GetKeyDown(KeyCode.R))
+        // {
+        //     this.Send_Room_Exit();
+        // }
+        // if (Input.GetKeyDown(KeyCode.A))
+        // {
+        //     this.Send_Game_Do(2, 5);
+        // }
+        // if (Input.GetKeyDown(KeyCode.S))
+        // {
+        //     this.Send_Game_Result(GameResultState.Win);
+        // }
+        // if (Input.GetKeyDown(KeyCode.D))
+        // {
+        //     Disconnect();
+        // }
+
+        // #endregion
 
     }
 
+    #region 회원가입 및 로그인
+
+    /// <param name="signup_data">데이터</param>
+    /// <param name="success">성공 시 호출할 콜백 함수</param>
+    /// <param name="failure">실패 시 호출할 콜백 함수</param>
+    /// <summary> 회원가입</summary>
+    public IEnumerator Signup(SignupData signup_data, Action success, Action<int> failure)
+    {
+        string jsonString = JsonUtility.ToJson(signup_data);
+        byte[] byteRaw = System.Text.Encoding.UTF8.GetBytes(jsonString);
+
+        using (UnityWebRequest www = new UnityWebRequest(Defines.LOGIN_SERVER_URL + "/users/signup",
+                   UnityWebRequest.kHttpVerbPOST))
+        {
+            www.uploadHandler = new UploadHandlerRaw(byteRaw);
+            www.downloadHandler = new DownloadHandlerBuffer();
+            www.SetRequestHeader("Content-Type", "application/json");
+
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.ConnectionError)
+            {
+                // 서버 연결 오류에 대해 알림
+                Debug.Log("로그인 서버 연결 에러");
+            }
+            else
+            {
+                var resultString = www.downloadHandler.text;
+                var result = JsonUtility.FromJson<SigninResult>(resultString);
+
+                if (result.result == 2)
+                {
+                    success?.Invoke();
+                }
+                else
+                {
+                    failure?.Invoke(result.result);
+                }
+            }
+        }
+    }
+
+
+    /// <param name="signin_data">데이터</param>
+    /// <param name="success">성공 시 호출할 콜백 함수</param>
+    /// <param name="failure">실패 시 호출할 콜백 함수</param>
+    /// <summary> 로그인</summary>
+    public IEnumerator Signin(SigninData signin_data, Action success, Action<int> failure)
+    {
+        string jsonString = JsonUtility.ToJson(signin_data);
+        byte[] byteRaw = System.Text.Encoding.UTF8.GetBytes(jsonString);
+
+        using (UnityWebRequest www = new UnityWebRequest(Defines.LOGIN_SERVER_URL + "/users/signin",
+                   UnityWebRequest.kHttpVerbPOST))
+        {
+            www.uploadHandler = new UploadHandlerRaw(byteRaw);
+            www.downloadHandler = new DownloadHandlerBuffer();
+            www.SetRequestHeader("Content-Type", "application/json");
+
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.ConnectionError)
+            {
+                // 서버 연결 오류에 대해 알림
+                Debug.Log("로그인 서버 연결 에러");
+            }
+            else
+            {
+                var resultString = www.downloadHandler.text;
+                var result = JsonUtility.FromJson<SigninResult>(resultString);
+
+                if (result.result == (int)ResponseType.SUCCESS)
+                {
+                    // 로그인 성공
+                    var cookie = www.GetResponseHeader("set-cookie");
+                    if (!string.IsNullOrEmpty(cookie))
+                    {
+                        int lastIndex = cookie.LastIndexOf(';');
+                        string sid = cookie.Substring(0, lastIndex);
+
+                        // 저장
+                        PlayerPrefs.SetString("sid", sid);
+                    }
+                    ConnectServer();
+                    success?.Invoke();
+                }
+                else
+                {
+                    // 로그인 실패
+                    failure?.Invoke(result.result);
+                }
+            }
+        }
+        ;
+    }
+
+    #endregion
+
+    #region TCP 서버 연결 관리 및 Send & Recv 콜백 구조
+    /// <summary> TCP 서버 연결 </summary>
     private void ConnectServer()
     {
         try
         {
+            // 소켓 생성
             this.client_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            IPAddress ip_addr = IPAddress.Parse(Defines.IP);
-            IPEndPoint remote_ep = new IPEndPoint(ip_addr, Defines.port);
+            // 엔드 포인트 설정
+            IPAddress ip_addr = IPAddress.Parse(Defines.TCP_SERVER_IP);
+            IPEndPoint remote_ep = new IPEndPoint(ip_addr, Defines.TCP_SERVER_port);
 
             Debug.Log("서버에 연결중..");
 
+            // 통신 시작
             this.client_socket.BeginConnect(remote_ep, new AsyncCallback(ConnectCallback), null);
         }
         catch (Exception e)
@@ -167,6 +305,7 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    /// <summary> Recv 성공 시 버퍼 데이터 파싱 및 처리 </summary>
     private void ProcessReceivedData()
     {
         while (true)
@@ -249,7 +388,10 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    // 
+    #endregion
+
+    #region Send & Recv API
+
     public void Send_Get_Room()
     {
         Packet packet = new Packet(PROTOCOL.ROOM_REQUEST);
@@ -319,5 +461,7 @@ public class NetworkManager : MonoBehaviour
     {
         Debug.Log("게임종료 Alert 받음");
     }
+    
+    #endregion
 
 }

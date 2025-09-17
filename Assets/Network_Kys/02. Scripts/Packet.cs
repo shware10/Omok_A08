@@ -11,6 +11,7 @@ public class Packet
 
     public byte[] body = new byte[1024];
 
+    /// <summary> 데이터를 보내야하는 패킷 생성자 </summary>
     public Packet(PROTOCOL pro, byte[] data = null)
     {
         this.type = pro;
@@ -19,6 +20,7 @@ public class Packet
             Array.Copy(data, body, this.body_size);
     }
 
+    /// <summary> 특수 요청만 보내면 되는 패킷 생성자 </summary>
     public Packet(PROTOCOL pro, int param)
     {
         byte[] data = BitConverter.GetBytes(param);
@@ -28,6 +30,8 @@ public class Packet
         if (data != null)
             Array.Copy(data, body, this.body_size);
     }
+
+    /// <summary> 게임 결과 패킷 생성자 </summary>
     public Packet(PROTOCOL pro, byte state)
     {
         this.type = pro;
