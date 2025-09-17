@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-    public enum CellState { Empty, Black, White }
-
     [Header("Board")]
     [SerializeField] private int rows = 15;                       // 좌우 행열 크기
     [SerializeField] private int cols = 15;                       // 좌우 행열 크기
@@ -22,20 +20,20 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private LayerMask boardMask = ~0;            // 3D Raycast 용
 
     Camera cam;
-    public CellState[,] board;
-    CellState turn = CellState.Black;                             // 처음 시작시 흑이 시작
+    public StoneState[,] board;
+    StoneState turn = StoneState.Black;                             // 처음 시작시 흑이 시작
 
     void Awake()
     {
         cam = Camera.main;
-        board = new CellState[rows, cols];
+        board = new StoneState[rows, cols];
         if (origin == null) origin = transform;
         if (stonesParent == null) stonesParent = transform;
 
-        if (RenjuRule.Instance != null)
-        {
-            RenjuRule.Instance.Initialize(board, rows, cols);
-        }
+        //if (Board.Instance != null)
+        //{
+        //    Board.Instance.Initialize(board, rows, cols);
+        //}
     }
 
     void Update()
@@ -57,14 +55,14 @@ public class BoardManager : MonoBehaviour
         if (!TryGetCell(worldPoint, out var cell)) 
             return;
 
-        if (turn == CellState.Black)
+        if (turn == StoneState.Black)
         {
-            if (RenjuRule.Instance.IsForbiddenBlackRock(cell.x, cell.y))
-            {
-                Debug.Log("해당 위치는 금수입니다");
-                // 금수 텍스트 UI 로직 위치???
-                return;
-            }
+            //if (Board.Instance.IsForbiddenBlackRock(cell.x, cell.y))
+            //{
+            //    Debug.Log("해당 위치는 금수입니다");
+            //    // 금수 텍스트 UI 로직 위치???
+            //    return;
+            //}
         }
 
         PlaceStone(cell);
@@ -156,15 +154,15 @@ public class BoardManager : MonoBehaviour
     /// <param name="cell"></param>
     void PlaceStone(Vector2Int cell)
     {
-        if (board[cell.x, cell.y] != CellState.Empty) 
+        if (board[cell.x, cell.y] != StoneState.Empty) 
             return;
 
-        GameObject prefab = (turn == CellState.Black) ? blackStonePrefab : whiteStonePrefab;
+        GameObject prefab = (turn == StoneState.Black) ? blackStonePrefab : whiteStonePrefab;
         var pos = CellToWorldCenter(cell);
         Instantiate(prefab, pos, Quaternion.identity, stonesParent);
 
         board[cell.x, cell.y] = turn;
-        turn = (turn == CellState.Black) ? CellState.White : CellState.Black;
+        turn = (turn == StoneState.Black) ? StoneState.White : StoneState.Black;
 
         // 승, 패 로직 추가 위치!!! (아마도 여기일겁니다...?)-------------------------------------------------------------------- ✔✔✔✔✔
     }
