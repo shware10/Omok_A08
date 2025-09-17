@@ -46,71 +46,71 @@ public class NetworkManager : Singleton<NetworkManager>
             }
         }
 
-        #region 테스트 인풋
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            SignupData temp = new SignupData("test04", "test1234");
-            StartCoroutine(Signup(temp,
-            () =>
-            {
-                Debug.Log("회원 가입 성공");
-            },
-            (response) =>
-            {
-                if (response == (int)ResponseType.INVALID_USERNAME)
-                {
-                    Debug.Log($"회원 가입 실패 : 이미 존재하는 사용자입니다.");
-                }
-            }));
+        // #region 테스트 인풋
+        // if (Input.GetKeyDown(KeyCode.Q))
+        // {
+        //     SignupData temp = new SignupData("test04", "test1234");
+        //     StartCoroutine(Signup(temp,
+        //     () =>
+        //     {
+        //         Debug.Log("회원 가입 성공");
+        //     },
+        //     (response) =>
+        //     {
+        //         if (response == (int)ResponseType.INVALID_USERNAME)
+        //         {
+        //             Debug.Log($"회원 가입 실패 : 이미 존재하는 사용자입니다.");
+        //         }
+        //     }));
 
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            SigninData temp = new SigninData("test05", "test1234");
-            StartCoroutine(Signin(temp,
-            () =>
-            {
-                Debug.Log("로그인 성공");
-            },
-             (response) =>
-             {
-                 string log = "";
+        // }
+        // if (Input.GetKeyDown(KeyCode.W))
+        // {
+        //     SigninData temp = new SigninData("test05", "test1234");
+        //     StartCoroutine(Signin(temp,
+        //     () =>
+        //     {
+        //         Debug.Log("로그인 성공");
+        //     },
+        //      (response) =>
+        //      {
+        //          string log = "";
 
-                 if (response == (int)ResponseType.INVALID_USERNAME)
-                 {
-                     log = "ID가 유효하지 않습니다.";
-                 }
-                 else if (response == (int)ResponseType.INVALID_PASSWORD)
-                 {
-                     log = "비밀번호가 유효하지 않습니다.";
-                 }
+        //          if (response == (int)ResponseType.INVALID_USERNAME)
+        //          {
+        //              log = "ID가 유효하지 않습니다.";
+        //          }
+        //          else if (response == (int)ResponseType.INVALID_PASSWORD)
+        //          {
+        //              log = "비밀번호가 유효하지 않습니다.";
+        //          }
 
-                 Debug.Log(log);
-             }));
+        //          Debug.Log(log);
+        //      }));
 
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            this.Send_Room_Join(1000);
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            this.Send_Room_Exit();
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            this.Send_Game_Do(2, 5);
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            this.Send_Game_Result(GameResultState.Win);
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            Disconnect();
-        }
+        // }
+        // if (Input.GetKeyDown(KeyCode.E))
+        // {
+        //     this.Send_Room_Join(1000);
+        // }
+        // if (Input.GetKeyDown(KeyCode.R))
+        // {
+        //     this.Send_Room_Exit();
+        // }
+        // if (Input.GetKeyDown(KeyCode.A))
+        // {
+        //     this.Send_Game_Do(2, 5);
+        // }
+        // if (Input.GetKeyDown(KeyCode.S))
+        // {
+        //     this.Send_Game_Result(GameResultState.Win);
+        // }
+        // if (Input.GetKeyDown(KeyCode.D))
+        // {
+        //     Disconnect();
+        // }
 
-        #endregion
+        // #endregion
 
     }
 
