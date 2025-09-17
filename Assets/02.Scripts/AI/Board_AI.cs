@@ -37,13 +37,6 @@ public class Board_AI : MonoBehaviour
         return true;
     }
 
-    public bool CheckRule(int x, int y)
-    {
-
-
-        return true;
-    }
-
     public bool IsFive(int x, int y, StoneState curStone)
     {
         for(int i = 0; i < directions.Length; ++i)
