@@ -1,4 +1,4 @@
-
+/// <summary> 회원가입 데이터 구조체 </summary>
 public struct SignupData
 {
     public string username;
@@ -11,11 +11,7 @@ public struct SignupData
     }
 }
 
-public struct SigninResult
-{
-    public int result;
-}
-
+/// <summary> 로그인 데이터 구조체 </summary>
 public struct SigninData
 {
     public string username;
@@ -26,4 +22,10 @@ public struct SigninData
         this.username = username;
         this.password = password;
     }
+}
+
+/// <summary> Response 파싱 구조체 </summary>
+public struct SigninResult
+{
+    public int result;
 }

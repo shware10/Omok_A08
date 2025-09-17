@@ -1,3 +1,4 @@
+/// <summary> 헤더 프로토콜 타입 </summary>
 public enum PROTOCOL : ushort
 {
     ROOM_REQUEST = 0,  // 방 목록 받음
@@ -16,9 +17,10 @@ public enum GameResultState : byte
     Draw
 }
 
-
-public enum ResponseType : int{
-  INVALID_USERNAME = 0,
-  INVALID_PASSWORD ,
-  SUCCESS ,
+/// <summary> 회원가입 및 로그인 응답 타입 </summary>
+public enum ResponseType : int
+{
+    INVALID_USERNAME = 0, // ID가 중복 혹은 잘못됐을 시
+    INVALID_PASSWORD,     // Password가 잘못됐을 시 
+    SUCCESS,             // 성공
 }
