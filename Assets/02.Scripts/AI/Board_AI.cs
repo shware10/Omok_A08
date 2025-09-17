@@ -3,6 +3,7 @@ using UnityEngine;
 public class Board_AI : MonoBehaviour
 {
     public int N;
+
     int empty = 15 * 15;
     private StoneState[,] board;
 

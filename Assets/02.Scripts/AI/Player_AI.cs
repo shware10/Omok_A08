@@ -18,10 +18,10 @@ public class Player_AI : MonoBehaviour
             if (Input.GetMouseButtonUp(0))
             {
                 Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Cell_AI cell = null;
+                Cell cell = null;
                 if (Physics.Raycast(r, out var hit, 100f, cellMask))
                 {
-                    cell = hit.collider.GetComponent<Cell_AI>();
+                    cell = hit.collider.GetComponent<Cell>();
                     if(cell != null && board.IsEmpty(cell.X, cell.Y))
                     {
                         OnStone(cell.X, cell.Y);

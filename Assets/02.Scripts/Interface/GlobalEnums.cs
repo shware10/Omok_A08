@@ -7,12 +7,6 @@ public enum GameState
     Draw
 }
 
-public enum PlayerState
-{ 
-    Black,
-    White
-}
-
 public enum StoneState
 {
     Black,

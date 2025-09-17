@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Cell_AI : MonoBehaviour,IGameStateListener
+public class Cell : MonoBehaviour,IGameStateListener
 {
     public int X, Y;
     GameObject whiteStone;
@@ -18,6 +18,7 @@ public class Cell_AI : MonoBehaviour,IGameStateListener
     {
         whiteStone.SetActive(false);
         blackStone.SetActive(false);
+        curState = StoneState.Empty;
     }
 
     public void ActivateStone(StoneState curStone)
