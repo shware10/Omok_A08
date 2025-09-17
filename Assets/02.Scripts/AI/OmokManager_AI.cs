@@ -53,10 +53,10 @@ public class OmokManager_AI : MonoBehaviour, IGameStateListener
             {
                 yield return ai.Think(board, (StoneState)(turn % 2), OnStone);
             }
-
             yield return null;
         }
     }
+
     void OnStone(int x, int y)
     {
         StoneState curStone = (StoneState)(turn % 2);
