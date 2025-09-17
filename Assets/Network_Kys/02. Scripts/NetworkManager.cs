@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -20,6 +23,22 @@ public class NetworkManager : Singleton<NetworkManager>
 
     Action<byte[]>[] recv_act_lookup_arr;
 
+    #region 외부 구독용 액션
+
+    /// <summary> 수 지정 액션 ( 게스트 -> 호스트 )</summary>
+    public event Action<byte, byte> move_req_act;
+
+    /// <summary> 수 확정 액션 ( 호스트 -> 게스트 )</summary>
+    public event Action<ushort, byte, byte, byte> move_com_act;
+
+    /// <summary> 게임 결과 확정 액션 ( 호스트 -> 게스트 )</summary>
+    public event Action<byte> game_result_act;
+
+    /// <summary> 게임 시작 액션 ( 호스트 -> 게스트 )</summary>
+    public event Action<byte> game_start_act;
+
+    #endregion
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -28,10 +47,12 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Room_Create,
             Handle_Room_Join,
             Handle_Room_Exit,
-            Handle_Game_DO,
+            Handle_Move_Req,
+            Handle_Move_Com,
             Handle_Game_Result,
             Handle_Game_Start
         };
+            // ConnectServer();
     }
 
     void Update()
@@ -90,7 +111,7 @@ public class NetworkManager : Singleton<NetworkManager>
         // }
         // if (Input.GetKeyDown(KeyCode.E))
         // {
-        //     this.Send_Room_Join(1000);
+        //     this.Send_Move_Request(1, 5);
         // }
         // if (Input.GetKeyDown(KeyCode.R))
         // {
@@ -98,11 +119,11 @@ public class NetworkManager : Singleton<NetworkManager>
         // }
         // if (Input.GetKeyDown(KeyCode.A))
         // {
-        //     this.Send_Game_Do(2, 5);
+            
         // }
         // if (Input.GetKeyDown(KeyCode.S))
         // {
-        //     this.Send_Game_Result(GameResultState.Win);
+
         // }
         // if (Input.GetKeyDown(KeyCode.D))
         // {
@@ -143,7 +164,7 @@ public class NetworkManager : Singleton<NetworkManager>
                 var resultString = www.downloadHandler.text;
                 var result = JsonUtility.FromJson<SigninResult>(resultString);
 
-                if (result.result == 2)
+                if (result.result == (int)ResponseType.SUCCESS)
                 {
                     success?.Invoke();
                 }
@@ -350,7 +371,7 @@ public class NetworkManager : Singleton<NetworkManager>
         Disconnect();
     }
 
-    private void send_packet(Packet packet)
+    private void Send_Packet(Packet packet)
     {
         if (client_socket == null || !client_socket.Connected)
             return;
@@ -392,39 +413,66 @@ public class NetworkManager : Singleton<NetworkManager>
 
     #region Send & Recv API
 
-    public void Send_Get_Room()
+    public void Send_Get_Room(int index)
     {
         Packet packet = new Packet(PROTOCOL.ROOM_REQUEST);
-        send_packet(packet);
+        packet.Write(BitConverter.GetBytes(index));
+
+        Send_Packet(packet);
     }
 
-    public void Send_Room_Crate()
+    public void Send_Room_Crate(string title)
     {
+        byte[] temp = Encoding.UTF8.GetBytes(title);
         Packet packet = new Packet(PROTOCOL.ROOM_CREATE);
-        send_packet(packet);
+        packet.Write(temp);
+
+        Send_Packet(packet);
     }
     public void Send_Room_Join(int room_id)
     {
-        Packet packet = new Packet(PROTOCOL.ROOM_JOIN, room_id);
-        send_packet(packet);
+        Packet packet = new Packet(PROTOCOL.ROOM_JOIN);
+        packet.Write(BitConverter.GetBytes(room_id));
+
+        Send_Packet(packet);
     }
 
     public void Send_Room_Exit()
     {
         Packet packet = new Packet(PROTOCOL.ROOM_EXIT);
-        send_packet(packet);
+        Send_Packet(packet);
     }
 
-    public void Send_Game_Do(int row, int col)
+    public void Send_Move_Request(byte x, byte y)
     {
-        Packet packet = new Packet(PROTOCOL.GAME_DO);
-        send_packet(packet);
+        Packet packet = new Packet(PROTOCOL.GAME_MOVE_REQ);
+        packet.Write(x);
+        packet.Write(y);
+        Send_Packet(packet);
     }
 
-    public void Send_Game_Result(GameResultState state)
+    public void Send_Move_Commit(ushort turn_no, byte x, byte y, byte player)
     {
-        Packet packet = new Packet(PROTOCOL.GAME_WIN, (byte)state);
-        send_packet(packet);
+        Packet packet = new Packet(PROTOCOL.GAME_MOVE_COM);
+        packet.Write(BitConverter.GetBytes(turn_no));
+        packet.Write(x);
+        packet.Write(y);
+        packet.Write(player);
+        Send_Packet(packet);
+    }
+
+    public void Send_Game_Result(byte result)
+    {
+        Packet packet = new Packet(PROTOCOL.GAME_RESULT);
+        packet.Write(result);
+        Send_Packet(packet);
+    }
+
+    public void Send_Game_Start(byte blackIsHost)
+    {
+        Packet packet = new Packet(PROTOCOL.GAME_START);
+        packet.Write(blackIsHost);
+        Send_Packet(packet);
     }
 
     private void Handle_Room_Response(byte[] data)
@@ -447,21 +495,37 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         Debug.Log("방 퇴장 요청 ACK 받음");
     }
-    private void Handle_Game_Start(byte[] data)
+
+    private void Handle_Move_Req(byte[] data)
     {
-        Debug.Log("방 게임 시작 요청 받음");
+        byte x = data[0];
+        byte y = data[1];
+        Debug.Log($"X = {x} , Y = {y}");
+        this.move_req_act?.Invoke(x, y);
     }
 
-    private void Handle_Game_DO(byte[] data)
+    private void Handle_Move_Com(byte[] data)
     {
-        Debug.Log("상대방 턴 완료 Alert 받음");
+        ushort turn = BitConverter.ToUInt16(data, 0);
+
+        byte x = data[2];
+        byte y = data[3];
+        byte player = data[4];
+        this.move_com_act?.Invoke(turn, x,y,player);
     }
 
     private void Handle_Game_Result(byte[] data)
     {
-        Debug.Log("게임종료 Alert 받음");
+        byte result = data[0];
+        this.game_result_act?.Invoke(result);
     }
-    
+
+    private void Handle_Game_Start(byte[] data)
+    {
+        byte blackIsHost = data[0];
+        this.game_start_act?.Invoke(blackIsHost);
+    }
+
     #endregion
 
 }
