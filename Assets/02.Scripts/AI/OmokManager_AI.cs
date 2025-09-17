@@ -57,6 +57,7 @@ public class OmokManager_AI : MonoBehaviour, IGameStateListener
             yield return null;
         }
     }
+
     void OnStone(int x, int y)
     {
         StoneState curStone = (StoneState)(turn % 2);
