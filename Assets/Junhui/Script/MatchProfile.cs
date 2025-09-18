@@ -5,7 +5,8 @@ public class MatchProfile : MonoBehaviour
 {
     public Button GameStart;
 
-    int room_id = 0;
+    public int room_id = 0;
+    public string room_title = "";
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

@@ -61,17 +61,16 @@ public class LobbyManager : MonoBehaviour
     public void Refresh()
     {
         NetworkManager.Instance.Send_Get_Room(0);
-        List list = new List();
-        list.Add(0);
+        List<Room> list = new List<Room>();
         CreateProfiles(list);
     }
 
-    public void CreateProfiles(List Rooms)
+    public void CreateProfiles(List<Room> Rooms)
     {
-        Rooms.count;
+        RemoveAllProfile();
         for (int i = 0; i < Rooms.Count; i++)
         {
-            AddProfile(Rooms)
+            AddProfile(Rooms[i].room_id, Rooms[i].room_title);
         }
     }
 
@@ -79,6 +78,9 @@ public class LobbyManager : MonoBehaviour
     public void AddProfile(int room_id,string room_title)
     {
         GameObject obj = Instantiate(MatchProfile, Content.transform);
+        obj.GetComponent<MatchProfile>().room_id = room_id;
+        obj.GetComponent<MatchProfile>().room_title = room_title;
+        
     }
     public void RemoveAllProfile()
     {
