@@ -29,3 +29,9 @@ public struct SigninResult
 {
     public int result;
 }
+
+public struct Room
+{
+   public int room_id;
+   public string room_title;
+}

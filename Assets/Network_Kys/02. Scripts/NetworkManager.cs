@@ -8,6 +8,7 @@ using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UIElements;
 
 public class NetworkManager : Singleton<NetworkManager>
 {
@@ -24,6 +25,18 @@ public class NetworkManager : Singleton<NetworkManager>
     Action<byte[]>[] recv_act_lookup_arr;
 
     #region 외부 구독용 액션
+
+    /// <summary> 방 목록 요청 콜백 액션 </summary>
+    public event Action<List<Room>> room_res_act;
+
+    /// <summary> 방 생성 요청 콜백 액션 </summary>
+    public event Action<int> room_create_act;
+
+    /// <summary> 방 입장 요청 콜백 액션 </summary>
+    public event Action<int> room_join_act;
+
+    /// <summary> 방 퇴장 요청 콜백 액션 </summary>
+    public event Action<int> room_exit_act;
 
     /// <summary> 수 지정 액션 ( 게스트 -> 호스트 )</summary>
     public event Action<byte, byte> move_req_act;
@@ -52,7 +65,7 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Game_Result,
             Handle_Game_Start
         };
-            // ConnectServer();
+        ConnectServer();
     }
 
     void Update()
@@ -115,15 +128,15 @@ public class NetworkManager : Singleton<NetworkManager>
         // }
         // if (Input.GetKeyDown(KeyCode.R))
         // {
-        //     this.Send_Room_Exit();
+        //     this.Send_Room_Join(41);
         // }
         // if (Input.GetKeyDown(KeyCode.A))
         // {
-            
+        //     this.Send_Room_Crate("test-01");
         // }
         // if (Input.GetKeyDown(KeyCode.S))
         // {
-
+        //     this.Send_Get_Room(1);
         // }
         // if (Input.GetKeyDown(KeyCode.D))
         // {
@@ -425,10 +438,11 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         byte[] temp = Encoding.UTF8.GetBytes(title);
         Packet packet = new Packet(PROTOCOL.ROOM_CREATE);
+        packet.Write((byte)temp.Length);
         packet.Write(temp);
-
         Send_Packet(packet);
     }
+
     public void Send_Room_Join(int room_id)
     {
         Packet packet = new Packet(PROTOCOL.ROOM_JOIN);
@@ -477,23 +491,44 @@ public class NetworkManager : Singleton<NetworkManager>
 
     private void Handle_Room_Response(byte[] data)
     {
-        Debug.Log("방 목록 받음");
+        List<Room> rooms = new List<Room>();
+        int position = 0;
+
+        while (position < data.Length)
+        {
+            Room temp = new Room();
+            ushort title_length = BitConverter.ToUInt16(data, position + 4);
+
+            temp.room_id = BitConverter.ToInt32(data, position);
+
+            temp.room_title = Encoding.UTF8.GetString(data, position + 6, title_length);
+            rooms.Add(temp);
+
+            position += 6 + title_length;
+
+            Debug.Log($"방 ID : {temp.room_id} , 방 제목 : {temp.room_title}");
+        }
+        this.room_res_act?.Invoke(rooms);
     }
 
     private void Handle_Room_Create(byte[] data)
     {
-        Debug.Log("방 생성 요청 ACK 받음");
+        // 성공 = 1 , 실패 = 0
+        room_create_act?.Invoke(data[0]);
     }
 
 
     private void Handle_Room_Join(byte[] data)
     {
-        Debug.Log("방 참가 요청 ACK 받음");
+        // 방이 존재하지 않음 = -1 , 입장 성공 = 1 , 호스트 입장에서 게스트가 방 입장 = 2
+        Debug.Log($"참가 = {data[0]}");
+        room_join_act?.Invoke(data[0]);
     }
 
     private void Handle_Room_Exit(byte[] data)
     {
-        Debug.Log("방 퇴장 요청 ACK 받음");
+        // 퇴장 성공 = 1 , 상대방 플레이어가 나감 = 2
+        room_exit_act?.Invoke(data[0]);
     }
 
     private void Handle_Move_Req(byte[] data)
@@ -511,7 +546,7 @@ public class NetworkManager : Singleton<NetworkManager>
         byte x = data[2];
         byte y = data[3];
         byte player = data[4];
-        this.move_com_act?.Invoke(turn, x,y,player);
+        this.move_com_act?.Invoke(turn, x, y, player);
     }
 
     private void Handle_Game_Result(byte[] data)
