@@ -12,30 +12,23 @@ public class Packet
     public byte[] body = new byte[1024];
 
     /// <summary> 데이터를 보내야하는 패킷 생성자 </summary>
-    public Packet(PROTOCOL pro, byte[] data = null)
+    public Packet(PROTOCOL pro)
     {
         this.type = pro;
-        this.body_size = (ushort)(data != null ? data.Length : 0);
-        if (data != null)
-            Array.Copy(data, body, this.body_size);
     }
 
-    /// <summary> 특수 요청만 보내면 되는 패킷 생성자 </summary>
-    public Packet(PROTOCOL pro, int param)
+    /// <summary> 바이트 배열 더하기 </summary>
+    public void Write(byte[] data)
     {
-        byte[] data = BitConverter.GetBytes(param);
-
-        this.type = pro;
-        this.body_size = (ushort)(data == null ? data.Length : 0);
         if (data != null)
-            Array.Copy(data, body, this.body_size);
+            Array.Copy(data, 0, body, body_size, data.Length);
+        this.body_size += (ushort)data.Length;
     }
 
-    /// <summary> 게임 결과 패킷 생성자 </summary>
-    public Packet(PROTOCOL pro, byte state)
+    public void Write(byte data)
     {
-        this.type = pro;
-        this.body[0] = state;
+        this.body[body_size] = data;
+        this.body_size++;
     }
 
     // 파라미터에 직렬화 된 패킷 데이터 복사
@@ -53,5 +46,6 @@ public class Packet
         dst[3] = size[1];
 
         Array.Copy(this.body, 0, dst, 4, body_size);
+
     }
 }
