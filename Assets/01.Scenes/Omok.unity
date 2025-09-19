@@ -32596,24 +32596,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &3928374266501030498
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5198738468948226573}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f4630ec4d1f36e4e972a2ebeaae594a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  N: 15
-  cellMask:
-    serializedVersion: 2
-    m_Bits: 8
-  turn: 0
-  curState: 0
 --- !u!1 &3930384042084585750
 GameObject:
   m_ObjectHideFlags: 0
@@ -42493,7 +42475,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 147920278039823578}
-  - component: {fileID: 3928374266501030498}
+  - component: {fileID: 5198738468948226574}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -42501,6 +42483,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &5198738468948226574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5198738468948226573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd2716a350fd21a47af94d5be982965d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  N: 15
+  cellMask:
+    serializedVersion: 2
+    m_Bits: 8
+  isHost: 1
+  curTurn: 0
+  myStone: 0
+  turnNo: 0
+  curState: 0
 --- !u!4 &5200850501598809594
 Transform:
   m_ObjectHideFlags: 0
