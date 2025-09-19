@@ -141,10 +141,9 @@ public class OmokManager : MonoBehaviour
 
     private void UpdateLastMarker(int x, int y) // 마지막 착수한 돌 위치 마커 생성 
     {
-
         Vector3 worldPos = BoardToWorld(x, y);
-        worldPos.z = -2f;
-        activeLastMarker = Instantiate(last_Marker, worldPos, boardOriginPoint.rotation);
+        worldPos.y -= 2f;
+        activeLastMarker = Instantiate(last_Marker, worldPos, Quaternion.identity);
     }
 
     private void UpdateForbiddenMarkers() // 흑돌 금수 위치 마커 생성 
@@ -158,7 +157,6 @@ public class OmokManager : MonoBehaviour
         if (turn != StoneState.Black)
             return;
 
-        /* 15x15 좌표에 금수로 지정될 부분에 전부 금수 마커 생성 */
         for (int i = 0; i < N; i++)
         {
             for (int j = 0; j < N; j++)
@@ -166,18 +164,18 @@ public class OmokManager : MonoBehaviour
                 if (board.IsEmpty(i, j) && board.IsForbiddenMove(i, j))
                 {
                     Vector3 worldPos = BoardToWorld(i, j);
-                    worldPos.z = -2f;
-                    GameObject markerInstance = Instantiate(x_Marker, worldPos, boardOriginPoint.rotation);
-                    activeXMarkers.Add(markerInstance);
+                    worldPos.y -= 2f;
+                    GameObject marerInstance = Instantiate(x_Marker, worldPos, Quaternion.identity);
+                    activeXMarkers.Add(marerInstance);
                 }
             }
         }
     }
     private Vector3 BoardToWorld(int x, int y) // World 좌표로 변환
     {
-        float cellSize = 0.5f;
-        Vector3 origin = boardOriginPoint.position;
+        float cellSize = 1f;
+        Vector3 origin = Vector3.zero;
 
-        return origin + new Vector3(x * cellSize, y * cellSize, 0);
+        return origin + new Vector3(x *  cellSize, 0, y * cellSize);
     }
 }
