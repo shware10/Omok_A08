@@ -111,7 +111,7 @@ public class OmokManager_Multi : MonoBehaviour
     {
         if (curTurn == StoneState.Black)
         {
-            if (board.IsForbiddenBlackRock(x, y))   //렌쥬룰 체크
+            if (board.IsForbiddenMove(x, y))   //렌쥬룰 체크
             {
                 OnForbbidenSeleted?.Invoke();
                 Debug.Log("금수입니다.");

@@ -63,7 +63,10 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Move_Req,
             Handle_Move_Com,
             Handle_Game_Result,
-            Handle_Game_Start
+            Handle_Game_Start,
+            Handle_Lobby_Chat,
+            Handle_Game_Chat,
+            Handle_Server_BRC
         };
         ConnectServer();
     }
@@ -79,71 +82,71 @@ public class NetworkManager : Singleton<NetworkManager>
             }
         }
 
-        // #region 테스트 인풋
-        // if (Input.GetKeyDown(KeyCode.Q))
-        // {
-        //     SignupData temp = new SignupData("test04", "test1234");
-        //     StartCoroutine(Signup(temp,
-        //     () =>
-        //     {
-        //         Debug.Log("회원 가입 성공");
-        //     },
-        //     (response) =>
-        //     {
-        //         if (response == (int)ResponseType.INVALID_USERNAME)
-        //         {
-        //             Debug.Log($"회원 가입 실패 : 이미 존재하는 사용자입니다.");
-        //         }
-        //     }));
+        #region 테스트 인풋
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            SignupData temp = new SignupData("test04", "test1234");
+            StartCoroutine(Signup(temp,
+            () =>
+            {
+                Debug.Log("회원 가입 성공");
+            },
+            (response) =>
+            {
+                if (response == (int)ResponseType.INVALID_USERNAME)
+                {
+                    Debug.Log($"회원 가입 실패 : 이미 존재하는 사용자입니다.");
+                }
+            }));
 
-        // }
-        // if (Input.GetKeyDown(KeyCode.W))
-        // {
-        //     SigninData temp = new SigninData("test05", "test1234");
-        //     StartCoroutine(Signin(temp,
-        //     () =>
-        //     {
-        //         Debug.Log("로그인 성공");
-        //     },
-        //      (response) =>
-        //      {
-        //          string log = "";
+        }
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            SigninData temp = new SigninData("test05", "test1234");
+            StartCoroutine(Signin(temp,
+            () =>
+            {
+                Debug.Log("로그인 성공");
+            },
+             (response) =>
+             {
+                 string log = "";
 
-        //          if (response == (int)ResponseType.INVALID_USERNAME)
-        //          {
-        //              log = "ID가 유효하지 않습니다.";
-        //          }
-        //          else if (response == (int)ResponseType.INVALID_PASSWORD)
-        //          {
-        //              log = "비밀번호가 유효하지 않습니다.";
-        //          }
+                 if (response == (int)ResponseType.INVALID_USERNAME)
+                 {
+                     log = "ID가 유효하지 않습니다.";
+                 }
+                 else if (response == (int)ResponseType.INVALID_PASSWORD)
+                 {
+                     log = "비밀번호가 유효하지 않습니다.";
+                 }
 
-        //          Debug.Log(log);
-        //      }));
+                 Debug.Log(log);
+             }));
 
-        // }
-        // if (Input.GetKeyDown(KeyCode.E))
-        // {
-        //     this.Send_Move_Request(1, 5);
-        // }
-        // if (Input.GetKeyDown(KeyCode.R))
-        // {
-        //     this.Send_Room_Join(41);
-        // }
-        // if (Input.GetKeyDown(KeyCode.A))
-        // {
-        //     this.Send_Room_Crate("test-01");
-        // }
-        // if (Input.GetKeyDown(KeyCode.S))
-        // {
-        //     this.Send_Get_Room(1);
-        // }
-        // if (Input.GetKeyDown(KeyCode.D))
-        // {
-        //     Disconnect();
-        // }
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            this.Send_Move_Request(1, 5);
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            this.Send_Room_Join(41);
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            this.Send_Room_Crate("test-01");
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            this.Send_Get_Room(1);
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            Disconnect();
+        }
 
-        // #endregion
+        #endregion
 
     }
 
@@ -489,6 +492,16 @@ public class NetworkManager : Singleton<NetworkManager>
         Send_Packet(packet);
     }
 
+    public void Send_Lobby_Chat(string str)
+    {
+
+    }
+
+    public void Send_Game_Chat(string str)
+    {
+
+    }
+
     private void Handle_Room_Response(byte[] data)
     {
         List<Room> rooms = new List<Room>();
@@ -520,7 +533,7 @@ public class NetworkManager : Singleton<NetworkManager>
 
     private void Handle_Room_Join(byte[] data)
     {
-        // 방이 존재하지 않음 = -1 , 입장 성공 = 1 , 호스트 입장에서 게스트가 방 입장 = 2
+        // 방이 존재하지 않음 = 255 , 입장 성공 = 1 , 호스트 입장에서 게스트가 방 입장 = 2
         Debug.Log($"참가 = {data[0]}");
         room_join_act?.Invoke(data[0]);
     }
@@ -559,6 +572,21 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         byte blackIsHost = data[0];
         this.game_start_act?.Invoke(blackIsHost);
+    }
+
+    private void Handle_Lobby_Chat(byte[] data)
+    {   
+        
+    }
+
+    private void Handle_Game_Chat(byte[] data)
+    {
+
+    }
+
+    private void Handle_Server_BRC(byte[] data)
+    {
+        
     }
 
     #endregion
