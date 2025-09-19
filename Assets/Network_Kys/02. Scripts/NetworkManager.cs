@@ -545,6 +545,7 @@ public class NetworkManager : Singleton<NetworkManager>
         byte x = data[0];
         byte y = data[1];
         Debug.Log($"X = {x} , Y = {y}");
+        Debug.Log($"게스트 -> 호스트 착수 Alert. x = {x} , y = {y}");
         this.move_req_act?.Invoke(x, y);
     }
 
@@ -555,18 +556,21 @@ public class NetworkManager : Singleton<NetworkManager>
         byte x = data[2];
         byte y = data[3];
         byte player = data[4];
+        Debug.Log($"호스트 -> 게스트 게임 착수 완료 Alert . x = {x} , y = {y} , player = {player}");
         this.move_com_act?.Invoke(turn, x, y, player);
     }
 
     private void Handle_Game_Result(byte[] data)
     {
         byte result = data[0];
+        Debug.Log($"호스트 -> 게스트 게임 결과 Alert : {result}");
         this.game_result_act?.Invoke(result);
     }
 
     private void Handle_Game_Start(byte[] data)
     {
         byte blackIsHost = data[0];
+        Debug.Log("호스트 -> 게스트 게임 시작 Alert");
         this.game_start_act?.Invoke(blackIsHost);
     }
 
