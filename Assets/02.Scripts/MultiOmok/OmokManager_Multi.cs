@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class OmokManager_Multi : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class OmokManager_Multi : MonoBehaviour
     [SerializeField] public int N = 15;
     public LayerMask cellMask;
     private Board board;
+
+    public Button StartButton;
 
     [Header("Online")]
     public bool isHost = true;
@@ -52,6 +55,8 @@ public class OmokManager_Multi : MonoBehaviour
         var FSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                   .OfType<IForbiddenSelectListener>();
         foreach (var listener in FSListeners) OnForbbidenSeleted += listener.OnForbbidenSeleted;
+
+        StartButton.onClick.AddListener(HostStartGame);
 
         NetworkManager networkManager = NetworkManager.Instance;
         networkManager.room_create_act += (int isSuccess) => { if(isSuccess == 1) isHost = true; };
@@ -200,6 +205,8 @@ public class OmokManager_Multi : MonoBehaviour
 
         byte blackIsHost = randBool ? (byte)1 : (byte)0;
 
+        StartButton.gameObject.SetActive(false);
+
         NetworkManager.Instance.Send_Game_Start(blackIsHost);
     }
     /// <summary>
@@ -218,5 +225,7 @@ public class OmokManager_Multi : MonoBehaviour
         turnNo = 0;
         board = new Board(N);
         SetState(GameState.None);
+
+        StartButton.gameObject.SetActive(false);
     }
 }
