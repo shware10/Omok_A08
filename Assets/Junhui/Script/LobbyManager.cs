@@ -17,6 +17,8 @@ public class LobbyManager : MonoBehaviour
     void Start()
     {
         ShowMatch();
+        NetworkManager.Instance.room_res_act += CreateProfiles;
+        NetworkManager.Instance.room_join_act += JoinRoom;
     }
 
     // Update is called once per frame

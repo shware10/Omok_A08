@@ -303,6 +303,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameStart: {fileID: 5953992613198346636}
+  Title: {fileID: 5458248262602390887}
+  room_id: 0
+  room_title: 
 --- !u!1 &3727686046971741427
 GameObject:
   m_ObjectHideFlags: 0
