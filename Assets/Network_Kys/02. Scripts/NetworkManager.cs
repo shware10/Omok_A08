@@ -65,7 +65,7 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Game_Result,
             Handle_Game_Start
         };
-        // ConnectServer();
+        ConnectServer();
     }
 
     void Update()
@@ -77,6 +77,14 @@ public class NetworkManager : Singleton<NetworkManager>
                 Action act = main_thread_actions.Dequeue();
                 act?.Invoke();
             }
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            Send_Room_Crate("test01");
+        }
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            Send_Room_Join(41);
         }
 
         // #region 테스트 인풋
@@ -146,6 +154,7 @@ public class NetworkManager : Singleton<NetworkManager>
         // #endregion
 
     }
+
 
     #region 회원가입 및 로그인
 
