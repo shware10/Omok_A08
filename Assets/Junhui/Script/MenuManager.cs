@@ -43,7 +43,7 @@ public class MenuManager : MonoBehaviour
         string username = LoginUsername.text;
         string password = LoginPassword.text;
         SigninData str = new SigninData(username,password);
-        NetworkManager.Instance.Signin(str, ShowMain,SignInFalied);
+        StartCoroutine(NetworkManager.Instance.Signin(str, ShowMain,SignInFalied));
 
     }
     public void SignUp()
@@ -51,18 +51,19 @@ public class MenuManager : MonoBehaviour
         string username = SignUpUsername.text;
         string password = SignUpPassword.text;
         SignupData str = new SignupData(username, password);
-        NetworkManager.Instance.Signup(str, ShowLogin, SignUpFalied);
+        StartCoroutine(NetworkManager.Instance.Signup(str, ShowMain, SignInFalied));
+
     }
     public void SignInFalied(int i)
     {
-        if (i == 0) LoginWarning.text = "ÀÌ¸ÞÀÏÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.";
-        if (i == 1) LoginWarning.text = "ºñ¹Ð¹øÈ£°¡ Àß¸øµÇ¾ú½À´Ï´Ù.";
+        if (i == 0) LoginWarning.text = "ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß¸ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.";
+        if (i == 1) LoginWarning.text = "ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ ï¿½ß¸ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.";
         LoginWarning.gameObject.SetActive(true);
     }
     public void SignUpFalied(int i)
     {
-        if (i == 0) SignUpWarning.text = "ÀÌ¸ÞÀÏÀÌ Áßº¹µÇ¾ú½À´Ï´Ù..";
-        if (i == 1) SignUpWarning.text = "ºñ¹Ð¹øÈ£°¡ Àß¸øµÇ¾ú½À´Ï´Ù.";
+        if (i == 0) SignUpWarning.text = "ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ßºï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½Ï´ï¿½..";
+        if (i == 1) SignUpWarning.text = "ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ ï¿½ß¸ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.";
         SignUpWarning.gameObject.SetActive(true);
     }
     public void ShowMain()
