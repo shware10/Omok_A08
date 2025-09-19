@@ -54,7 +54,7 @@ using UnityEngine;
 //    B W W B W W B
 //  ? W W W ? W W W ?
 
-public class Board
+public class BoardCopy
 {
     // 팀원이 쉽게 렌주룰에 접근 가능하도록 싱글톤으로 만들어두었음!!
     public int N;
@@ -76,7 +76,7 @@ public class Board
     /// <summary>
     /// BoardManager의 현제 행과 열의 상태를 가지고 클래스를 서로 동기화
     /// </summary>
-    public Board(int N)
+    public BoardCopy(int N)
     {
         this.N = N;
         empty = N * N;
@@ -147,7 +147,7 @@ public class Board
     /// <param name="row"></param>
     /// <param name="col"></param>
     /// <returns></returns>
-    public bool IsForbiddenMove(int row, int col)
+    public bool IsForbiddenBlackRock(int row, int col)
     {
         // 빈칸 부분만 금수인지 판단해서 놓지 못하게 해야하므로 빈공간이 아니라면 함수 종료
         if (!IsWithinBounds(row, col) || board[row, col] != StoneState.Empty)
@@ -168,7 +168,6 @@ public class Board
 
             int consecutiveStones = CountConsecutiveStones(row, col, dRow, dCol, StoneState.Black);
 
-
             // 오목인지 장목인지 먼저 검사 (5목이 되어버리면 승리, 흑돌이 장목이면 금수)
             if (consecutiveStones > 5)
             {
@@ -182,17 +181,11 @@ public class Board
             }
 
             // 현제의 방향에서 만들어질 수 있는 33, 44 패턴의 개수 검사 ( 44 먼저 검사후 33 검사 )
-            char[] line = CreateDirectionLine(row, col, dRow, dCol);
-            for (int start = 0; start <= line.Length - 6; start++)
+            if (IsFour(row, col, dRow, dCol, StoneState.Black))
             {
-                if (IsWindowOpenFour(line, start))
-                {
-                    fourCount++;
-                    break;
-                }
+                fourCount++;
             }
-
-            if (IsOpenThree(row, col, dRow, dCol, StoneState.Black))
+            else if (IsOpenThree(row, col, dRow, dCol, StoneState.Black))
             {
                 openThreecount++;
             }
@@ -211,48 +204,6 @@ public class Board
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="row"></param>
-    /// <param name="col"></param>
-    /// <param name="dRow"></param>
-    /// <param name="dCol"></param>
-    /// <returns></returns>
-    private char[] CreateDirectionLine(int row, int col, int dRow, int dCol)
-    {
-        const int R = 4; // 양쪽 4칸씩 = 총 9칸
-        char[] line = new char[2 * R + 1]; // 길이 9
-
-        for (int i = -R; i <= R; i++)
-        {
-            int r = row + i * dRow;
-            int c = col + i * dCol;
-
-            if (!IsWithinBounds(r, c))
-            {
-                line[i + R] = 'X'; // 보드 밖 → 막힘
-            }
-            else if (r == row && c == col)
-            {
-                line[i + R] = 'B'; // 현재 위치에 놓은 흑돌
-            }
-            else
-            {
-                var s = board[r, c];
-                line[i + R] = s switch
-                {
-                    StoneState.Black => 'B',
-                    StoneState.White => 'W',
-                    StoneState.Empty => 'E',
-                    _ => 'X'
-                };
-            }
-        }
-
-        return line;
-    }
-
-    /// <summary>
     /// 연속된 같은 색돌을 검사 (기존 CountStonesInLine 함수와 대체 되었음)_
     /// </summary>
     /// <param name="row"></param>
@@ -267,97 +218,97 @@ public class Board
         for (int i = 1; i < 6; i++)
         {
             if (GetState(row + i * dRow, col + i * dCol, player) == player)
-            {
                 count++;
-            }
             else
-            {
                 break;
-            }
         }
         for (int i = 1; i < 6; i++)
         {
             if (GetState(row - i * dRow, col - i * dCol, player) == player)
-            {
                 count++;
-            }
             else
-            {
                 break;
-            }
         }
         return count;
     }
 
-    private bool IsOpenThree(int row, int col, int dRow, int dCol, StoneState player)
+    private bool IsFour(int row, int col, int dRow, int dCol, StoneState player)
     {
-        const int R = 4; // 중심 좌우로 4칸 = 총 9칸 검사
-        var line = new char[2 * R + 1];
-
-        for (int i = -R; i <= R; i++)
+        for (int i = -4; i <= 0; i++)
         {
-            int r = row + i * dRow;
-            int c = col + i * dCol;
-
-            if (!IsWithinBounds(r, c))
+            int stoneCount = 0;
+            for (int j = 0; j < 5; j++)
             {
-                line[i + R] = 'X'; // 보드 밖 = 막힘
-                continue;
-            }
-
-            if (r == row && c == col)
-            {
-                line[i + R] = 'B'; // 지금 둔 내 돌
-                continue;
-            }
-
-            var s = board[r, c];
-            line[i + R] = s switch
-            {
-                StoneState.Empty => 'E',
-                _ when s == player => 'B',
-                _ => 'W'
-            };
-        }
-
-        // 빈칸 하나에 "내가 한 수 더 둔다"고 가정해 오픈4(EBBBBE)가 되는지 확인
-        for (int i = 0; i < line.Length; i++)
-        {
-            if (line[i] != 'E') continue;
-
-            char keep = line[i];
-            line[i] = 'B'; // 시뮬레이션 착수
-
-            bool makesOpenFour = false;
-            for (int start = 0; start <= line.Length - 6; start++)
-            {
-                if (IsWindowOpenFour(line, start))
+                if (GetState(row + (i + j) * dRow, col + (i + j) * dCol, player) == player)
                 {
-                    makesOpenFour = true;
-                    break;
+                    stoneCount++;
                 }
             }
+            if (stoneCount == 4)
+                return true;
+        }
+        return false;
+    }
+    /// <summary>
+    /// 띈 3 패턴을 직접 지정해서 확인하기 위함 | 
+    /// 열린 3이므로 열린 4도 가능
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="col"></param>
+    /// <param name="dRow"></param>
+    /// <param name="dCol"></param>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    private bool IsOpenThree(int row, int col, int dRow, int dCol, StoneState player)
+    {
+        // (row, col)에 돌이 놓인 후의 상태를 기준으로 검사
 
-            line[i] = keep; // 시뮬 회수
+        // 패턴 1: E B P B E | E = 빈칸, B = 흑 돌, P = 마지막으로 둔 돌 (P가 곧 row, col 좌표에 둔 돌)  
+        if (GetState(row - 2 * dRow, col - 2 * dCol, player) == StoneState.Empty &&
+            GetState(row - 1 * dRow, col - 1 * dCol, player) == player &&
+            GetState(row + 1 * dRow, col + 1 * dCol, player) == player &&
+            GetState(row + 2 * dRow, col + 2 * dCol, player) == StoneState.Empty)
+        {
+            return true;
+        }
 
-            if (makesOpenFour)
-                return true; // 이 방향에 오픈3 존재
+        // 패턴 2: B E P B E
+        if (GetState(row - 1 * dRow, col - 1 * dCol, player) == StoneState.Empty &&
+            GetState(row + 1 * dRow, col + 1 * dCol, player) == player &&
+            GetState(row + 2 * dRow, col + 2 * dCol, player) == StoneState.Empty &&
+            GetState(row - 2 * dRow, col - 2 * dCol, player) == player)
+        {
+            return true;
+        }
+        // 패턴 2 반전: E B P E B
+        if (GetState(row + 1 * dRow, col + 1 * dCol, player) == StoneState.Empty &&
+            GetState(row - 1 * dRow, col - 1 * dCol, player) == player &&
+            GetState(row - 2 * dRow, col - 2 * dCol, player) == StoneState.Empty &&
+            GetState(row + 2 * dRow, col + 2 * dCol, player) == player)
+        {
+            return true;
+        }
+
+        // 패턴 3: E E P B B E
+        if (GetState(row - 2 * dRow, col - 2 * dCol, player) == StoneState.Empty &&
+            GetState(row - 1 * dRow, col - 1 * dCol, player) == StoneState.Empty &&
+            GetState(row + 1 * dRow, col + 1 * dCol, player) == player &&
+            GetState(row + 2 * dRow, col + 2 * dCol, player) == player &&
+            GetState(row + 3 * dRow, col + 3 * dCol, player) == StoneState.Empty)
+        {
+            return true;
+        }
+        // 패턴 3 반전: E B B P E E
+        if (GetState(row + 2 * dRow, col + 2 * dCol, player) == StoneState.Empty &&
+            GetState(row + 1 * dRow, col + 1 * dCol, player) == StoneState.Empty &&
+            GetState(row - 1 * dRow, col - 1 * dCol, player) == player &&
+            GetState(row - 2 * dRow, col - 2 * dCol, player) == player &&
+            GetState(row - 3 * dRow, col - 3 * dCol, player) == StoneState.Empty)
+        {
+            return true;
         }
 
         return false;
-    }
-
-    // 6칸 창이 정확히 'E B B B B E' 인지 검사
-    private bool IsWindowOpenFour(char[] line, int start)
-    {
-        if (line[start] != 'E' || line[start + 5] != 'E')
-            return false;
-        for (int k = 1; k <= 4; k++)
-            if (line[start + k] != 'B')
-                return false;
-
-        // 양끝이 진짜 빈칸인지(보드 밖 'X'가 아닌지) 확인
-        return true;
     }
 
     /// <summary>
