@@ -206,9 +206,11 @@ public class OmokManager_Multi : MonoBehaviour
         byte blackIsHost = randBool ? (byte)1 : (byte)0;
 
         StartButton.gameObject.SetActive(false);
+        Debug.Log("호스트가 게임을 시작");
 
         NetworkManager.Instance.Send_Game_Start(blackIsHost);
     }
+
     /// <summary>
     /// 수신될 서버에서 브로드 캐스트
     /// </summary>
@@ -227,5 +229,6 @@ public class OmokManager_Multi : MonoBehaviour
         SetState(GameState.None);
 
         StartButton.gameObject.SetActive(false);
+        Debug.Log("게스트도 게임을 시작");
     }
 }
