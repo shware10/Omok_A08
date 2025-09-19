@@ -47,16 +47,17 @@ public class OmokManager_AI : MonoBehaviour, IGameStateListener
         {
             if((StoneState)(turn%2) == selectedStone)
             {
-                yield return player.Think(board, selectedStone, OnStone);
+                yield return player.Think(board, selectedStone, OnStone);           //플레이어 턴
             }
             else
             {
-                yield return ai.Think(board, (StoneState)(turn % 2), OnStone);
+                yield return ai.Think(board, (StoneState)(turn % 2), OnStone);      //ai 턴
             }
 
             yield return null;
         }
     }
+
     void OnStone(int x, int y)
     {
         StoneState curStone = (StoneState)(turn % 2);

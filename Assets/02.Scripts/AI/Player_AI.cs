@@ -11,7 +11,7 @@ public class Player_AI : MonoBehaviour
         cellMask = LayerMask.NameToLayer("Cell");
     }
 
-    public IEnumerator Think(Board_AI board, StoneState selectedStone, Action<int,int> OnStone)
+    public IEnumerator Think(Board_AI board, StoneState me, Action<int,int> OnStone)
     {
         while(true)
         {

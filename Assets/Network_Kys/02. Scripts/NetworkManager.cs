@@ -3,8 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UIElements;
 
 public class NetworkManager : Singleton<NetworkManager>
 {
@@ -20,6 +24,34 @@ public class NetworkManager : Singleton<NetworkManager>
 
     Action<byte[]>[] recv_act_lookup_arr;
 
+    #region 외부 구독용 액션
+
+    /// <summary> 방 목록 요청 콜백 액션 </summary>
+    public event Action<List<Room>> room_res_act;
+
+    /// <summary> 방 생성 요청 콜백 액션 </summary>
+    public event Action<int> room_create_act;
+
+    /// <summary> 방 입장 요청 콜백 액션 </summary>
+    public event Action<int> room_join_act;
+
+    /// <summary> 방 퇴장 요청 콜백 액션 </summary>
+    public event Action<int> room_exit_act;
+
+    /// <summary> 수 지정 액션 ( 게스트 -> 호스트 )</summary>
+    public event Action<byte, byte> move_req_act;
+
+    /// <summary> 수 확정 액션 ( 호스트 -> 게스트 )</summary>
+    public event Action<ushort, byte, byte, byte> move_com_act;
+
+    /// <summary> 게임 결과 확정 액션 ( 호스트 -> 게스트 )</summary>
+    public event Action<byte> game_result_act;
+
+    /// <summary> 게임 시작 액션 ( 호스트 -> 게스트 )</summary>
+    public event Action<byte> game_start_act;
+
+    #endregion
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -28,10 +60,12 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Room_Create,
             Handle_Room_Join,
             Handle_Room_Exit,
-            Handle_Game_DO,
+            Handle_Move_Req,
+            Handle_Move_Com,
             Handle_Game_Result,
             Handle_Game_Start
         };
+        ConnectServer();
     }
 
     void Update()
@@ -43,6 +77,14 @@ public class NetworkManager : Singleton<NetworkManager>
                 Action act = main_thread_actions.Dequeue();
                 act?.Invoke();
             }
+        }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            Send_Room_Crate("test01");
+        }
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            Send_Room_Join(41);
         }
 
         // #region 테스트 인풋
@@ -90,19 +132,19 @@ public class NetworkManager : Singleton<NetworkManager>
         // }
         // if (Input.GetKeyDown(KeyCode.E))
         // {
-        //     this.Send_Room_Join(1000);
+        //     this.Send_Move_Request(1, 5);
         // }
         // if (Input.GetKeyDown(KeyCode.R))
         // {
-        //     this.Send_Room_Exit();
+        //     this.Send_Room_Join(41);
         // }
         // if (Input.GetKeyDown(KeyCode.A))
         // {
-        //     this.Send_Game_Do(2, 5);
+        //     this.Send_Room_Crate("test-01");
         // }
         // if (Input.GetKeyDown(KeyCode.S))
         // {
-        //     this.Send_Game_Result(GameResultState.Win);
+        //     this.Send_Get_Room(1);
         // }
         // if (Input.GetKeyDown(KeyCode.D))
         // {
@@ -112,6 +154,7 @@ public class NetworkManager : Singleton<NetworkManager>
         // #endregion
 
     }
+
 
     #region 회원가입 및 로그인
 
@@ -143,7 +186,7 @@ public class NetworkManager : Singleton<NetworkManager>
                 var resultString = www.downloadHandler.text;
                 var result = JsonUtility.FromJson<SigninResult>(resultString);
 
-                if (result.result == 2)
+                if (result.result == (int)ResponseType.SUCCESS)
                 {
                     success?.Invoke();
                 }
@@ -350,7 +393,7 @@ public class NetworkManager : Singleton<NetworkManager>
         Disconnect();
     }
 
-    private void send_packet(Packet packet)
+    private void Send_Packet(Packet packet)
     {
         if (client_socket == null || !client_socket.Connected)
             return;
@@ -392,76 +435,145 @@ public class NetworkManager : Singleton<NetworkManager>
 
     #region Send & Recv API
 
-    public void Send_Get_Room()
+    public void Send_Get_Room(int index)
     {
         Packet packet = new Packet(PROTOCOL.ROOM_REQUEST);
-        send_packet(packet);
+        packet.Write(BitConverter.GetBytes(index));
+
+        Send_Packet(packet);
     }
 
-    public void Send_Room_Crate()
+    public void Send_Room_Crate(string title)
     {
+        byte[] temp = Encoding.UTF8.GetBytes(title);
         Packet packet = new Packet(PROTOCOL.ROOM_CREATE);
-        send_packet(packet);
+        packet.Write((byte)temp.Length);
+        packet.Write(temp);
+        Send_Packet(packet);
     }
+
     public void Send_Room_Join(int room_id)
     {
-        Packet packet = new Packet(PROTOCOL.ROOM_JOIN, room_id);
-        send_packet(packet);
+        Packet packet = new Packet(PROTOCOL.ROOM_JOIN);
+        packet.Write(BitConverter.GetBytes(room_id));
+
+        Send_Packet(packet);
     }
 
     public void Send_Room_Exit()
     {
         Packet packet = new Packet(PROTOCOL.ROOM_EXIT);
-        send_packet(packet);
+        Send_Packet(packet);
     }
 
-    public void Send_Game_Do(int row, int col)
+    public void Send_Move_Request(byte x, byte y)
     {
-        Packet packet = new Packet(PROTOCOL.GAME_DO);
-        send_packet(packet);
+        Packet packet = new Packet(PROTOCOL.GAME_MOVE_REQ);
+        packet.Write(x);
+        packet.Write(y);
+        Send_Packet(packet);
     }
 
-    public void Send_Game_Result(GameResultState state)
+    public void Send_Move_Commit(ushort turn_no, byte x, byte y, byte player)
     {
-        Packet packet = new Packet(PROTOCOL.GAME_WIN, (byte)state);
-        send_packet(packet);
+        Packet packet = new Packet(PROTOCOL.GAME_MOVE_COM);
+        packet.Write(BitConverter.GetBytes(turn_no));
+        packet.Write(x);
+        packet.Write(y);
+        packet.Write(player);
+        Send_Packet(packet);
+    }
+
+    public void Send_Game_Result(byte result)
+    {
+        Packet packet = new Packet(PROTOCOL.GAME_RESULT);
+        packet.Write(result);
+        Send_Packet(packet);
+    }
+
+    public void Send_Game_Start(byte blackIsHost)
+    {
+        Packet packet = new Packet(PROTOCOL.GAME_START);
+        packet.Write(blackIsHost);
+        Send_Packet(packet);
     }
 
     private void Handle_Room_Response(byte[] data)
     {
-        Debug.Log("방 목록 받음");
+        List<Room> rooms = new List<Room>();
+        int position = 0;
+
+        while (position < data.Length)
+        {
+            Room temp = new Room();
+            ushort title_length = BitConverter.ToUInt16(data, position + 4);
+
+            temp.room_id = BitConverter.ToInt32(data, position);
+
+            temp.room_title = Encoding.UTF8.GetString(data, position + 6, title_length);
+            rooms.Add(temp);
+
+            position += 6 + title_length;
+
+            Debug.Log($"방 ID : {temp.room_id} , 방 제목 : {temp.room_title}");
+        }
+        this.room_res_act?.Invoke(rooms);
     }
 
     private void Handle_Room_Create(byte[] data)
     {
-        Debug.Log("방 생성 요청 ACK 받음");
+        // 성공 = 1 , 실패 = 0
+        room_create_act?.Invoke(data[0]);
     }
 
 
     private void Handle_Room_Join(byte[] data)
     {
-        Debug.Log("방 참가 요청 ACK 받음");
+        // 방이 존재하지 않음 = -1 , 입장 성공 = 1 , 호스트 입장에서 게스트가 방 입장 = 2
+        Debug.Log($"참가 = {data[0]}");
+        room_join_act?.Invoke(data[0]);
     }
 
     private void Handle_Room_Exit(byte[] data)
     {
-        Debug.Log("방 퇴장 요청 ACK 받음");
-    }
-    private void Handle_Game_Start(byte[] data)
-    {
-        Debug.Log("방 게임 시작 요청 받음");
+        // 퇴장 성공 = 1 , 상대방 플레이어가 나감 = 2
+        room_exit_act?.Invoke(data[0]);
     }
 
-    private void Handle_Game_DO(byte[] data)
+    private void Handle_Move_Req(byte[] data)
     {
-        Debug.Log("상대방 턴 완료 Alert 받음");
+        byte x = data[0];
+        byte y = data[1];
+        Debug.Log($"X = {x} , Y = {y}");
+        Debug.Log($"게스트 -> 호스트 착수 Alert. x = {x} , y = {y}");
+        this.move_req_act?.Invoke(x, y);
+    }
+
+    private void Handle_Move_Com(byte[] data)
+    {
+        ushort turn = BitConverter.ToUInt16(data, 0);
+
+        byte x = data[2];
+        byte y = data[3];
+        byte player = data[4];
+        Debug.Log($"호스트 -> 게스트 게임 착수 완료 Alert . x = {x} , y = {y} , player = {player}");
+        this.move_com_act?.Invoke(turn, x, y, player);
     }
 
     private void Handle_Game_Result(byte[] data)
     {
-        Debug.Log("게임종료 Alert 받음");
+        byte result = data[0];
+        Debug.Log($"호스트 -> 게스트 게임 결과 Alert : {result}");
+        this.game_result_act?.Invoke(result);
     }
-    
+
+    private void Handle_Game_Start(byte[] data)
+    {
+        byte blackIsHost = data[0];
+        Debug.Log("호스트 -> 게스트 게임 시작 Alert");
+        this.game_start_act?.Invoke(blackIsHost);
+    }
+
     #endregion
 
 }
