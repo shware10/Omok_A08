@@ -98,7 +98,6 @@ public class OmokManager_Multi : MonoBehaviour
     /// <param name="screenPos"></param>
     bool RayToCell(out int x, out int y)
     {
-        
         x = y = -1;
 
         Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
