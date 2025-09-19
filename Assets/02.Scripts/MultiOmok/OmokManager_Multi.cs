@@ -46,7 +46,7 @@ public class OmokManager_Multi : MonoBehaviour
         //delegate 구독
         var BSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                           .OfType<IBoardStateListener>();
-        foreach(var listener in BSListeners) OnBoardChanged += listener.OnBoardChanged;
+        foreach (var listener in BSListeners) OnBoardChanged += listener.OnBoardChanged;
 
         var GSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                           .OfType<IGameStateListener>();
@@ -59,7 +59,7 @@ public class OmokManager_Multi : MonoBehaviour
         StartButton.onClick.AddListener(HostStartGame);
 
         NetworkManager networkManager = NetworkManager.Instance;
-        networkManager.room_create_act += (int isSuccess) => { if(isSuccess == 1) isHost = true; };
+        networkManager.room_create_act += (int isSuccess) => { if (isSuccess == 1) isHost = true; };
         networkManager.room_join_act += (int isSuccess) => { if (isSuccess == 1) isHost = false; };
         networkManager.move_req_act += OnMoveReq;
         networkManager.move_com_act += OnMoveCommit;
@@ -74,8 +74,16 @@ public class OmokManager_Multi : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (isHost) TryPlace_Host();
-            else TryPlace_Guest();
+            if (isHost)
+            {
+                Debug.Log("호스트 클릭");
+                TryPlace_Host();
+            }
+            else
+            {
+                Debug.Log("게스트 클릭");
+                TryPlace_Guest();
+            }
         }
     }
 
@@ -101,14 +109,14 @@ public class OmokManager_Multi : MonoBehaviour
         x = y = -1;
 
         Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (!Physics.Raycast(r, out var hit, 100f, cellMask)) return false;
+        if (Physics.Raycast(r, out var hit, 100f, cellMask))
+        {
+            Cell cell = hit.collider.GetComponent<Cell>();
+            if (cell == null) return false;
 
-        Cell cell = hit.collider.GetComponent<Cell>(); 
-        if (cell != null) return false;
-
-        x = cell.X; y = cell.Y;
-        Debug.Log($"레이캐스트 실행 x : {x} / y : {y}");
-
+            x = cell.X; y = cell.Y;
+            Debug.Log($"레이캐스트 실행 x : {x} / y : {y}");
+        }
         return true;
     }
 
@@ -146,7 +154,7 @@ public class OmokManager_Multi : MonoBehaviour
         if (board.IsFull())
         {
             SetState(GameState.Draw);               //승리 없이 돌이 다 찼으면 무승부
-            //게스트로 브로드 캐스트
+                                                    //게스트로 브로드 캐스트
             NetworkManager.Instance.Send_Game_Result((byte)3);
             Debug.Log("무승부");
             return;
@@ -159,9 +167,9 @@ public class OmokManager_Multi : MonoBehaviour
     {
         if (isHost) return;
 
-        if (result == 1)        SetState(GameState.BlackWin);
-        else if (result == 2)   SetState(GameState.WhiteWin);
-        else if (result == 3)   SetState(GameState.Draw);
+        if (result == 1) SetState(GameState.BlackWin);
+        else if (result == 2) SetState(GameState.WhiteWin);
+        else if (result == 3) SetState(GameState.Draw);
     }
 
     //호스트가 게스트 요청 수신
@@ -191,7 +199,7 @@ public class OmokManager_Multi : MonoBehaviour
     /// <summary>
     /// 서버에 송신 호스트에서만 실행
     /// </summary>
-    public void HostStartGame() 
+    public void HostStartGame()
     {
         if (!isHost) return;
 
