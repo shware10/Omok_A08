@@ -79,7 +79,6 @@ public class OmokManager_Multi : MonoBehaviour
         }
     }
 
-
     void TryPlace_Host()
     {
         if (!RayToCell(out int x, out int y)) return;
@@ -99,6 +98,7 @@ public class OmokManager_Multi : MonoBehaviour
     /// <param name="screenPos"></param>
     bool RayToCell(out int x, out int y)
     {
+        
         x = y = -1;
 
         Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -108,6 +108,7 @@ public class OmokManager_Multi : MonoBehaviour
         if (cell != null) return false;
 
         x = cell.X; y = cell.Y;
+        Debug.Log($"레이캐스트 실행 x : {x} / y : {y}");
 
         return true;
     }
