@@ -223,6 +223,7 @@ GameObject:
   - component: {fileID: 3125447995788758543}
   - component: {fileID: 1564306727904567638}
   - component: {fileID: 114935594749702426}
+  - component: {fileID: 238725866065501391}
   m_Layer: 5
   m_Name: MatchProfile
   m_TagString: Untagged
@@ -289,6 +290,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &238725866065501391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3257543893050400464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d5d404572afbb8499241baf738efe1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GameStart: {fileID: 5953992613198346636}
 --- !u!1 &3727686046971741427
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4513192008516369707}
   - component: {fileID: 1849065525373923537}
   m_Layer: 0
-  m_Name: last-position-marker
+  m_Name: last_Marker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -19,7 +19,6 @@ public class MenuManager : MonoBehaviour
 
     void Start()
     {
-        ShowLogin();
     }
 
     void Update()
