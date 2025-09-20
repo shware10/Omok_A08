@@ -10,6 +10,7 @@ public class LobbyManager : MonoBehaviour
     public GameObject Match;
     public GameObject NewRoom;
     public GameObject AIMatch;
+    public GameObject Chat;
     public GameObject MatchProfile;
     public GameObject Content;
     public TMP_InputField Title;
@@ -31,6 +32,7 @@ public class LobbyManager : MonoBehaviour
     {
         Reset();
         Match.SetActive(true);
+        Refresh();
     }
     public void ShowAIMatch()
     {
@@ -41,12 +43,18 @@ public class LobbyManager : MonoBehaviour
     {
         Reset();
         NewRoom.SetActive(true);
-    }    
+    }
+    public void ShowChat()
+    {
+        Reset();
+        Chat.SetActive(true);
+    }
     private void Reset()
     {
         Match.SetActive(false);
         NewRoom.SetActive(false);
         AIMatch.SetActive(false);
+        Chat.SetActive(false);
     }
 
 
