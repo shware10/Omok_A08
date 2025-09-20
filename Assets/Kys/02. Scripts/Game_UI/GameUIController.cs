@@ -32,13 +32,13 @@ public class GameUIController : MonoBehaviour
 
     public event Action start_btn_act;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        this.start_btn.onClick.AddListener(OnStartBtn);
+        // this.start_btn.onClick.AddListener(OnStartBtn);
         this.exit_btn.onClick.AddListener(OnExitBtn);
         this.chat_confirm_btn.onClick.AddListener(SendGameChat);
     }
+
 
     void Update()
     {
@@ -51,11 +51,17 @@ public class GameUIController : MonoBehaviour
     void OnEnable()
     {
         NetworkManager.Instance.game_chat_act += GameChatCallBack;
+        NetworkManager.Instance.room_join_act += OppnentJoinAlert;
+        NetworkManager.Instance.room_exit_act += OppnentExitAlert;
+        NetworkManager.Instance.server_brc_act += ServerBrcCallback;
     }
 
     void OnDisable()
     {
         NetworkManager.Instance.game_chat_act -= GameChatCallBack;
+        NetworkManager.Instance.room_join_act -= OppnentJoinAlert;
+        NetworkManager.Instance.room_exit_act -= OppnentExitAlert;
+        NetworkManager.Instance.server_brc_act -= ServerBrcCallback;
     }
 
     /// <summary> 게임 시작 시 초기화 ( 게임 시작 시 호출 필요 ) </summary>
@@ -92,8 +98,8 @@ public class GameUIController : MonoBehaviour
                 break;
             case GameState.WhiteWin:
                 win_or_lose_panel.SetActive(true);
-                win_black_image.SetActive(true);
-                win_white_image.SetActive(false);
+                win_black_image.SetActive(false);
+                win_white_image.SetActive(true);
                 break;
             case GameState.Draw:
                 draw_panel.SetActive(true);
@@ -114,7 +120,14 @@ public class GameUIController : MonoBehaviour
 
     private void OnExitBtn()
     {
-        NetworkManager.Instance.Send_Room_Exit();
+        int scene_idx = SceneManager.GetActiveScene().buildIndex;
+        if (scene_idx == 1)
+        {
+            NetworkManager.Instance.Send_Room_Exit();
+
+        }
+        else if (scene_idx == 2)
+            SceneManager.LoadScene(0);
     }
 
 
@@ -135,9 +148,34 @@ public class GameUIController : MonoBehaviour
 
     private void GameChatCallBack(string name, string chat)
     {
-        GameObject text_box = Instantiate(text_box_prefab, content.transform);
+        Chat($"{name} : {chat}");
+    }
 
-        text_box.GetComponent<TextMeshProUGUI>().text = $"{name} : {chat}";
+    private void OppnentJoinAlert(int flag)
+    {
+        if (flag == 2)
+        {
+            Chat("Someone has joined the room");
+        }
+    }
+
+    private void OppnentExitAlert(int flag)
+    {
+        if (flag == 2)
+        {
+            Chat("The opponent left");
+        }
+    }
+
+    private void ServerBrcCallback(string str)
+    {
+
+    }
+
+    private void Chat(string str)
+    {
+        GameObject text_box = Instantiate(text_box_prefab, content.transform);
+        text_box.GetComponent<TextMeshProUGUI>().text = str;
     }
 
 }

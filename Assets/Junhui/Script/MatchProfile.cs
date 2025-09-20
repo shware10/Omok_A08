@@ -16,12 +16,5 @@ public class MatchProfile : MonoBehaviour
         GameObject lobbyManager = GameObject.FindWithTag("LobbyManager");
         LobbyManager manager = lobbyManager.GetComponent<LobbyManager>();
         GameStart.onClick.AddListener(delegate { manager.JoinRoom(room_id); });
-
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
     }
 }

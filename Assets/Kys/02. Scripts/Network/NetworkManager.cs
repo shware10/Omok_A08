@@ -12,7 +12,8 @@ public class NetworkManager : Singleton<NetworkManager>
 {
     private Socket client_socket;
 
-    private string player_name;
+    public string player_name; // 플레이어 ID ( 클라이언트 저장 )
+    public bool isLogin = false;
 
     /// <summary> Update 실행 큐 ( Recv의 시점을 Update 프레임 시점에 동기화 시키기 위한 큐인듯 ) </summary>
     private readonly Queue<Action> main_thread_actions = new Queue<Action>();
@@ -54,6 +55,8 @@ public class NetworkManager : Singleton<NetworkManager>
 
     public event Action<string, string> game_chat_act;
 
+    public event Action<string> server_brc_act;
+
     #endregion
 
     protected override void Awake()
@@ -77,7 +80,7 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Game_Chat,
             Handle_Server_BRC
         };
-        ConnectServer();
+        // ConnectServer();
     }
 
     void Update()
@@ -91,27 +94,27 @@ public class NetworkManager : Singleton<NetworkManager>
             }
         }
 
-        #region 테스트 인풋
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            Send_Room_Crate("test01");
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            Send_Room_Join(41);
-        }
+        // #region 테스트 인풋
+        // if (Input.GetKeyDown(KeyCode.A))
+        // {
+        //     Send_Room_Crate("test01");
+        // }
+        // else if (Input.GetKeyDown(KeyCode.S))
+        // {
+        //     Send_Room_Join(41);
+        // }
 
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            this.player_name = "bi_do";
-        }
+        // if (Input.GetKeyDown(KeyCode.Q))
+        // {
+        //     this.player_name = "bi_do";
+        // }
        
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            Disconnect();
-        }
+        // if (Input.GetKeyDown(KeyCode.D))
+        // {
+        //     Disconnect();
+        // }
 
-        #endregion
+        // #endregion
 
     }
 
@@ -251,6 +254,7 @@ public class NetworkManager : Singleton<NetworkManager>
                 main_thread_actions.Enqueue(() =>
                 {
                     Debug.Log("Connected successfully!");
+                    this.isLogin = true;
                 });
             }
 
@@ -584,8 +588,8 @@ public class NetworkManager : Singleton<NetworkManager>
         int name_len = data[0];
         int chat_len = data[1 + name_len];
 
-        name = Encoding.UTF8.GetString(data, 1, name_len);
-        chat = Encoding.UTF8.GetString(data, 1 + name_len, chat_len);
+        name = Encoding.UTF8.GetString(data, 1, name_len);          
+        chat = Encoding.UTF8.GetString(data, 2 + name_len, chat_len); // 2 + name len의 의미 = 헤더 2개 ( length byte 2개 + 이전 name의 length )
 
         this.lobby_chat_act?.Invoke(name, chat);
     }
@@ -598,7 +602,7 @@ public class NetworkManager : Singleton<NetworkManager>
         int chat_len = data[1 + name_len];
 
         name = Encoding.UTF8.GetString(data, 1, name_len);
-        chat = Encoding.UTF8.GetString(data, 1 + name_len, chat_len);
+        chat = Encoding.UTF8.GetString(data, 2 + name_len, chat_len);
 
         this.game_chat_act?.Invoke(name, chat);
     }
@@ -618,6 +622,8 @@ public class NetworkManager : Singleton<NetworkManager>
 
         AsyncOperation op = SceneManager.LoadSceneAsync(scene_idx);
         yield return op;
+
+        yield return null; // 구독 이전 액션 실행 방지
 
         switch (type)
         {
