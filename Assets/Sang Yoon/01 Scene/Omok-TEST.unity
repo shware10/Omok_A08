@@ -10347,11 +10347,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f4630ec4d1f36e4e972a2ebeaae594a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardOriginPoint: {fileID: 0}
+  boardOriginPoint: {fileID: 147920278039823578}
   N: 15
   cellMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   turn: 0
   curState: 0
   x_Marker: {fileID: 4418571726022394781, guid: d8489e5967528184babb94ced1b34034, type: 3}
