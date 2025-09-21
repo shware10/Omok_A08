@@ -65,7 +65,7 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Game_Result,
             Handle_Game_Start
         };
-        ConnectServer();
+        // ConnectServer();
     }
 
     void Update()

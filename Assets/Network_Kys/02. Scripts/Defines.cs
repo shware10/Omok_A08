@@ -1,6 +1,6 @@
 internal class Defines
 {
-    public static string LOGIN_SERVER_URL = "http://localhost:3000";
+    public static string LOGIN_SERVER_URL = "http://61.75.14.73:3000";
 
     public static string TCP_SERVER_IP = "61.75.14.73";
     public static int TCP_SERVER_port = 7000;

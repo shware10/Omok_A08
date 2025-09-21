@@ -10,11 +10,10 @@ public class OmokManager : MonoBehaviour
     [Header("Board")]
     [SerializeField] private Transform boardOriginPoint;
     [SerializeField] public int N = 15;
-    Board board;
-    Cell cell;
 
     public LayerMask cellMask;
 
+    Board board;
     public StoneState turn = StoneState.Black;                                      // 처음 시작시 흑이 시작
 
     public GameState curState;
@@ -34,7 +33,6 @@ public class OmokManager : MonoBehaviour
 
     private List<GameObject> activeXMarkers = new List<GameObject>();
     private GameObject activeLastMarker = null;
-
     public void SetState(GameState newState)
     {
         curState = newState;
@@ -44,7 +42,6 @@ public class OmokManager : MonoBehaviour
     void Awake()
     {
         board = new Board(N);
-        cell = GetComponent<Cell>();
         SetState(GameState.None);
     }
 
@@ -53,7 +50,7 @@ public class OmokManager : MonoBehaviour
         //delegate 구독
         var BSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                           .OfType<IBoardStateListener>();
-        foreach(var listener in BSListeners) OnBoardChanged += listener.OnBoardChanged;
+        foreach (var listener in BSListeners) OnBoardChanged += listener.OnBoardChanged;
 
         var GSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                           .OfType<IGameStateListener>();
@@ -66,7 +63,7 @@ public class OmokManager : MonoBehaviour
 
     void Update()
     {
-        if(curState == GameState.None)
+        if (curState == GameState.None)
         {
             if (Input.GetMouseButtonDown(0)) TryPlace();
         }
@@ -107,10 +104,9 @@ public class OmokManager : MonoBehaviour
             }
         }
 
-        cell.SetLastMarker(false);
         board.Place(x, y, turn);                    // 보드에 수를 놓으면
-        cell.SetLastMarker(true);
         Debug.Log("돌 놓기 완료");
+        UpdateLastMarker(x, y);                     // 마지막 착수 지점 마커 업데이트
         OnBoardChanged?.Invoke(x, y, turn);         // 보드 뷰 업데이트
         board.ShowBoard();
 
@@ -142,6 +138,15 @@ public class OmokManager : MonoBehaviour
         UpdateForbiddenMarkers();
     }
 
+
+    private void UpdateLastMarker(int x, int y) // 마지막 착수한 돌 위치 마커 생성 
+    {
+
+        Vector3 worldPos = BoardToWorld(x, y);
+        worldPos.z = -2f;
+        activeLastMarker = Instantiate(last_Marker, worldPos, boardOriginPoint.rotation);
+    }
+
     private void UpdateForbiddenMarkers() // 흑돌 금수 위치 마커 생성 
     {
         foreach (var marker in activeXMarkers)
@@ -153,6 +158,7 @@ public class OmokManager : MonoBehaviour
         if (turn != StoneState.Black)
             return;
 
+        /* 15x15 좌표에 금수로 지정될 부분에 전부 금수 마커 생성 */
         for (int i = 0; i < N; i++)
         {
             for (int j = 0; j < N; j++)
@@ -160,9 +166,9 @@ public class OmokManager : MonoBehaviour
                 if (board.IsEmpty(i, j) && board.IsForbiddenMove(i, j))
                 {
                     Vector3 worldPos = BoardToWorld(i, j);
-                    worldPos.y -= 2f;
-                    GameObject marerInstance = Instantiate(x_Marker, worldPos, Quaternion.identity);
-                    activeXMarkers.Add(marerInstance);
+                    worldPos.z = -2f;
+                    GameObject markerInstance = Instantiate(x_Marker, worldPos, boardOriginPoint.rotation);
+                    activeXMarkers.Add(markerInstance);
                 }
             }
         }
@@ -170,13 +176,8 @@ public class OmokManager : MonoBehaviour
     private Vector3 BoardToWorld(int x, int y) // World 좌표로 변환
     {
         float cellSize = 0.5f;
-        Vector3 origin = Vector3.zero;
+        Vector3 origin = boardOriginPoint.position;
 
-        return origin + new Vector3(x *  cellSize, y * cellSize, 0);
-    }
-
-    public void PlaceStone(int x, int y, StoneState stone)
-    {
-        
+        return origin + new Vector3(x * cellSize, y * cellSize, 0);
     }
 }
