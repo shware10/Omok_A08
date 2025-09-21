@@ -71,8 +71,8 @@ public class GameUIController : MonoBehaviour
         win_or_lose_panel.SetActive(false);
         draw_panel.SetActive(false);
 
-        player_text_black.text = my_state == StoneState.Black ? "나" : "상대방";
-        player_text_white.text = my_state == StoneState.Black ? "상대방" : "나";
+        player_text_black.text = my_state == StoneState.Black ? "나" : "AI";
+        player_text_white.text = my_state == StoneState.Black ? "AI" : "나";
 
         current_black.SetActive(true);
         current_white.SetActive(false);
