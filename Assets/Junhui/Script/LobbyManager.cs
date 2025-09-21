@@ -31,6 +31,7 @@ public class LobbyManager : MonoBehaviour
     void Start()
     {
         ShowMatch();
+        input_field.onSubmit.AddListener((str) => SendLobbyChat());
         this.AI_play_Btn.onClick.AddListener(OnAIPlayBtn);
         this.chat_confirm_btn.onClick.AddListener(SendLobbyChat);
     }
@@ -60,7 +61,7 @@ public class LobbyManager : MonoBehaviour
         Reset();
 
         Match.SetActive(true);
-        
+
         Refresh();
     }
 
@@ -139,6 +140,10 @@ public class LobbyManager : MonoBehaviour
             NetworkManager.Instance.Send_Lobby_Chat(chat);
 
             this.input_field.text = "";
+
+            // 포커스 유지
+            input_field.ActivateInputField();
+            input_field.MoveTextEnd(false);
         }
     }
 
@@ -150,7 +155,7 @@ public class LobbyManager : MonoBehaviour
 
     private void Chat(string str)
     {
-                GameObject text_box = Instantiate(text_box_prefab, chat_content_tf);
+        GameObject text_box = Instantiate(text_box_prefab, chat_content_tf);
 
         text_box.GetComponent<TextMeshProUGUI>().text = str;
     }

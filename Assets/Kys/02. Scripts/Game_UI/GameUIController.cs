@@ -35,6 +35,11 @@ public class GameUIController : MonoBehaviour
     void Start()
     {
         // this.start_btn.onClick.AddListener(OnStartBtn);
+        input_field.onSubmit.AddListener((str) =>
+        {
+            SendGameChat();
+        });
+
         this.exit_btn.onClick.AddListener(OnExitBtn);
         this.chat_confirm_btn.onClick.AddListener(SendGameChat);
     }
@@ -42,10 +47,6 @@ public class GameUIController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            SendGameChat();
-        }
     }
 
     void OnEnable()
@@ -70,8 +71,8 @@ public class GameUIController : MonoBehaviour
         win_or_lose_panel.SetActive(false);
         draw_panel.SetActive(false);
 
-        player_text_black.text = my_state == StoneState.Black ? "Player" : "Opponent";
-        player_text_white.text = my_state == StoneState.Black ? "Opponent" : "Player";
+        player_text_black.text = my_state == StoneState.Black ? "나" : "상대방";
+        player_text_white.text = my_state == StoneState.Black ? "상대방" : "나";
 
         current_black.SetActive(true);
         current_white.SetActive(false);
@@ -143,6 +144,10 @@ public class GameUIController : MonoBehaviour
             NetworkManager.Instance.Send_Game_Chat(chat);
 
             this.input_field.text = "";
+
+            // 포커스 유지
+            input_field.ActivateInputField();
+            input_field.MoveTextEnd(false);
         }
     }
 

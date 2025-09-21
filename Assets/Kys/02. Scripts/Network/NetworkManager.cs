@@ -64,7 +64,6 @@ public class NetworkManager : Singleton<NetworkManager>
         base.Awake();
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         this.recv_act_lookup_arr = new Action<byte[]>[]{
@@ -108,7 +107,7 @@ public class NetworkManager : Singleton<NetworkManager>
         // {
         //     this.player_name = "bi_do";
         // }
-       
+
         // if (Input.GetKeyDown(KeyCode.D))
         // {
         //     Disconnect();
@@ -413,7 +412,7 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         byte[] temp = Encoding.UTF8.GetBytes(title);
         Packet packet = new Packet(PROTOCOL.ROOM_CREATE);
-        packet.Write((byte)temp.Length);
+        packet.Write(BitConverter.GetBytes((ushort)temp.Length));
         packet.Write(temp);
         Send_Packet(packet);
     }
@@ -469,9 +468,9 @@ public class NetworkManager : Singleton<NetworkManager>
         byte[] temp_name = Encoding.UTF8.GetBytes(player_name);
         byte[] temp_chat = Encoding.UTF8.GetBytes(str);
         Packet packet = new Packet(PROTOCOL.LOBBY_CHAT);
-        packet.Write((byte)player_name.Length);
+        packet.Write(BitConverter.GetBytes((ushort)temp_name.Length));
         packet.Write(temp_name);
-        packet.Write((byte)str.Length);
+        packet.Write(BitConverter.GetBytes((ushort)temp_chat.Length));
         packet.Write(temp_chat);
 
         Send_Packet(packet);
@@ -482,10 +481,11 @@ public class NetworkManager : Singleton<NetworkManager>
         byte[] temp_name = Encoding.UTF8.GetBytes(player_name);
         byte[] temp_chat = Encoding.UTF8.GetBytes(str);
         Packet packet = new Packet(PROTOCOL.ROOM_CHAT);
-        packet.Write((byte)player_name.Length);
+        packet.Write(BitConverter.GetBytes((ushort)temp_name.Length));
         packet.Write(temp_name);
-        packet.Write((byte)str.Length);
+        packet.Write(BitConverter.GetBytes((ushort)temp_chat.Length));
         packet.Write(temp_chat);
+
 
         Send_Packet(packet);
     }
@@ -585,11 +585,11 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         string name;
         string chat;
-        int name_len = data[0];
-        int chat_len = data[1 + name_len];
+        int name_len = BitConverter.ToInt16(data, 0);
+        int chat_len = BitConverter.ToInt16(data, 2 + name_len);
 
-        name = Encoding.UTF8.GetString(data, 1, name_len);          
-        chat = Encoding.UTF8.GetString(data, 2 + name_len, chat_len); // 2 + name len의 의미 = 헤더 2개 ( length byte 2개 + 이전 name의 length )
+        name = Encoding.UTF8.GetString(data, 2, name_len);
+        chat = Encoding.UTF8.GetString(data, 4 + name_len, chat_len); // 4 + name len의 의미 = 헤더 2개 ( length ushort 2개 + 이전 name의 length )
 
         this.lobby_chat_act?.Invoke(name, chat);
     }
@@ -598,11 +598,11 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         string name;
         string chat;
-        int name_len = data[0];
-        int chat_len = data[1 + name_len];
+        int name_len = BitConverter.ToInt16(data, 0);
+        int chat_len = BitConverter.ToInt16(data, 2 + name_len);
 
-        name = Encoding.UTF8.GetString(data, 1, name_len);
-        chat = Encoding.UTF8.GetString(data, 2 + name_len, chat_len);
+        name = Encoding.UTF8.GetString(data, 2, name_len);
+        chat = Encoding.UTF8.GetString(data, 4 + name_len, chat_len);
 
         this.game_chat_act?.Invoke(name, chat);
     }
