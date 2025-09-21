@@ -912,6 +912,10 @@ PrefabInstance:
       value: Board
       objectReference: {fileID: 0}
     - target: {fileID: 8782067127392290702, guid: 53d885c156fa9074d8fd01c1b9184b3a, type: 3}
+      propertyPath: x_Marker
+      value: 
+      objectReference: {fileID: 4418571726022394781, guid: d8489e5967528184babb94ced1b34034, type: 3}
+    - target: {fileID: 8782067127392290702, guid: 53d885c156fa9074d8fd01c1b9184b3a, type: 3}
       propertyPath: StartButton
       value: 
       objectReference: {fileID: 1650213658}

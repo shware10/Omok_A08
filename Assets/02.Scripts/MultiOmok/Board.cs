@@ -3,7 +3,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 
-// 렌주룰 (Renju-Rule)
+// 렌주룰 (Renju-Rule) 설계 의사코드
 // 흑돌이 33, 44, 장목의 위치에 돌을 놓지 못하게하는 룰
 
 // 흑돌 금수 가능성 및 예외 (B = 흑돌, W = 백돌)
