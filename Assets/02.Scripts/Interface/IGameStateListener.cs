@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface IGameStateListener
 {
-    public void OnStateChanged(GameState state) { }
+    public void OnStateChanged(GameState state);
 }
