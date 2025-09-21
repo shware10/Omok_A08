@@ -30,10 +30,16 @@ public class Singleton<T> : MonoBehaviour where T : Component
     {
         if (instance == null)
         {
+            Debug.Log("인스턴스 없어서 할당");
             instance = this as T;
             DontDestroyOnLoad(gameObject);
         }
         else
+        {
+            Debug.Log("인스턴스 있어서 제거");
             Destroy(gameObject);
+        }
+        
+            
     }
 }

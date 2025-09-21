@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Unity.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;
 
 public class NetworkManager : Singleton<NetworkManager>
 {
     private Socket client_socket;
+
+    public string player_name; // 플레이어 ID ( 클라이언트 저장 )
+    public bool isLogin = false;
 
     /// <summary> Update 실행 큐 ( Recv의 시점을 Update 프레임 시점에 동기화 시키기 위한 큐인듯 ) </summary>
     private readonly Queue<Action> main_thread_actions = new Queue<Action>();
@@ -50,9 +51,19 @@ public class NetworkManager : Singleton<NetworkManager>
     /// <summary> 게임 시작 액션 ( 호스트 -> 게스트 )</summary>
     public event Action<byte> game_start_act;
 
+    public event Action<string, string> lobby_chat_act;
+
+    public event Action<string, string> game_chat_act;
+
+    public event Action<string> server_brc_act;
+
     #endregion
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
     void Start()
     {
         this.recv_act_lookup_arr = new Action<byte[]>[]{
@@ -63,9 +74,12 @@ public class NetworkManager : Singleton<NetworkManager>
             Handle_Move_Req,
             Handle_Move_Com,
             Handle_Game_Result,
-            Handle_Game_Start
+            Handle_Game_Start,
+            Handle_Lobby_Chat,
+            Handle_Game_Chat,
+            Handle_Server_BRC
         };
-        ConnectServer();
+        // ConnectServer();
     }
 
     void Update()
@@ -78,74 +92,22 @@ public class NetworkManager : Singleton<NetworkManager>
                 act?.Invoke();
             }
         }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            Send_Room_Crate("test01");
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            Send_Room_Join(41);
-        }
 
         // #region 테스트 인풋
-        // if (Input.GetKeyDown(KeyCode.Q))
-        // {
-        //     SignupData temp = new SignupData("test04", "test1234");
-        //     StartCoroutine(Signup(temp,
-        //     () =>
-        //     {
-        //         Debug.Log("회원 가입 성공");
-        //     },
-        //     (response) =>
-        //     {
-        //         if (response == (int)ResponseType.INVALID_USERNAME)
-        //         {
-        //             Debug.Log($"회원 가입 실패 : 이미 존재하는 사용자입니다.");
-        //         }
-        //     }));
-
-        // }
-        // if (Input.GetKeyDown(KeyCode.W))
-        // {
-        //     SigninData temp = new SigninData("test05", "test1234");
-        //     StartCoroutine(Signin(temp,
-        //     () =>
-        //     {
-        //         Debug.Log("로그인 성공");
-        //     },
-        //      (response) =>
-        //      {
-        //          string log = "";
-
-        //          if (response == (int)ResponseType.INVALID_USERNAME)
-        //          {
-        //              log = "ID가 유효하지 않습니다.";
-        //          }
-        //          else if (response == (int)ResponseType.INVALID_PASSWORD)
-        //          {
-        //              log = "비밀번호가 유효하지 않습니다.";
-        //          }
-
-        //          Debug.Log(log);
-        //      }));
-
-        // }
-        // if (Input.GetKeyDown(KeyCode.E))
-        // {
-        //     this.Send_Move_Request(1, 5);
-        // }
-        // if (Input.GetKeyDown(KeyCode.R))
-        // {
-        //     this.Send_Room_Join(41);
-        // }
         // if (Input.GetKeyDown(KeyCode.A))
         // {
-        //     this.Send_Room_Crate("test-01");
+        //     Send_Room_Crate("test01");
         // }
-        // if (Input.GetKeyDown(KeyCode.S))
+        // else if (Input.GetKeyDown(KeyCode.S))
         // {
-        //     this.Send_Get_Room(1);
+        //     Send_Room_Join(41);
         // }
+
+        // if (Input.GetKeyDown(KeyCode.Q))
+        // {
+        //     this.player_name = "bi_do";
+        // }
+
         // if (Input.GetKeyDown(KeyCode.D))
         // {
         //     Disconnect();
@@ -229,6 +191,8 @@ public class NetworkManager : Singleton<NetworkManager>
 
                 if (result.result == (int)ResponseType.SUCCESS)
                 {
+                    this.player_name = signin_data.username;
+
                     // 로그인 성공
                     var cookie = www.GetResponseHeader("set-cookie");
                     if (!string.IsNullOrEmpty(cookie))
@@ -289,6 +253,7 @@ public class NetworkManager : Singleton<NetworkManager>
                 main_thread_actions.Enqueue(() =>
                 {
                     Debug.Log("Connected successfully!");
+                    this.isLogin = true;
                 });
             }
 
@@ -447,7 +412,7 @@ public class NetworkManager : Singleton<NetworkManager>
     {
         byte[] temp = Encoding.UTF8.GetBytes(title);
         Packet packet = new Packet(PROTOCOL.ROOM_CREATE);
-        packet.Write((byte)temp.Length);
+        packet.Write(BitConverter.GetBytes((ushort)temp.Length));
         packet.Write(temp);
         Send_Packet(packet);
     }
@@ -498,6 +463,33 @@ public class NetworkManager : Singleton<NetworkManager>
         Send_Packet(packet);
     }
 
+    public void Send_Lobby_Chat(string str)
+    {
+        byte[] temp_name = Encoding.UTF8.GetBytes(player_name);
+        byte[] temp_chat = Encoding.UTF8.GetBytes(str);
+        Packet packet = new Packet(PROTOCOL.LOBBY_CHAT);
+        packet.Write(BitConverter.GetBytes((ushort)temp_name.Length));
+        packet.Write(temp_name);
+        packet.Write(BitConverter.GetBytes((ushort)temp_chat.Length));
+        packet.Write(temp_chat);
+
+        Send_Packet(packet);
+    }
+
+    public void Send_Game_Chat(string str)
+    {
+        byte[] temp_name = Encoding.UTF8.GetBytes(player_name);
+        byte[] temp_chat = Encoding.UTF8.GetBytes(str);
+        Packet packet = new Packet(PROTOCOL.ROOM_CHAT);
+        packet.Write(BitConverter.GetBytes((ushort)temp_name.Length));
+        packet.Write(temp_name);
+        packet.Write(BitConverter.GetBytes((ushort)temp_chat.Length));
+        packet.Write(temp_chat);
+
+
+        Send_Packet(packet);
+    }
+
     private void Handle_Room_Response(byte[] data)
     {
         List<Room> rooms = new List<Room>();
@@ -523,21 +515,36 @@ public class NetworkManager : Singleton<NetworkManager>
     private void Handle_Room_Create(byte[] data)
     {
         // 성공 = 1 , 실패 = 0
-        room_create_act?.Invoke(data[0]);
+        if (data[0] == 1)
+        {
+            StartCoroutine(LoadSceneRoutine(PROTOCOL.ROOM_CREATE, data[0]));
+        }
+        else
+            room_create_act?.Invoke(data[0]);
     }
 
 
     private void Handle_Room_Join(byte[] data)
     {
-        // 방이 존재하지 않음 = -1 , 입장 성공 = 1 , 호스트 입장에서 게스트가 방 입장 = 2
+        // 방이 존재하지 않음 = 255 , 입장 성공 = 1 , 호스트 입장에서 게스트가 방 입장 = 2
+        if (data[0] == 1)
+        {
+            StartCoroutine(LoadSceneRoutine(PROTOCOL.ROOM_JOIN, data[0]));
+        }
+        else
+            room_join_act?.Invoke(data[0]);
         Debug.Log($"참가 = {data[0]}");
-        room_join_act?.Invoke(data[0]);
     }
 
     private void Handle_Room_Exit(byte[] data)
     {
         // 퇴장 성공 = 1 , 상대방 플레이어가 나감 = 2
-        room_exit_act?.Invoke(data[0]);
+        if (data[0] == 1)
+        {
+            StartCoroutine(LoadSceneRoutine(PROTOCOL.ROOM_EXIT, data[0]));
+        }
+        else
+            room_exit_act?.Invoke(data[0]);
     }
 
     private void Handle_Move_Req(byte[] data)
@@ -574,6 +581,63 @@ public class NetworkManager : Singleton<NetworkManager>
         this.game_start_act?.Invoke(blackIsHost);
     }
 
+    private void Handle_Lobby_Chat(byte[] data)
+    {
+        string name;
+        string chat;
+        int name_len = BitConverter.ToInt16(data, 0);
+        int chat_len = BitConverter.ToInt16(data, 2 + name_len);
+
+        name = Encoding.UTF8.GetString(data, 2, name_len);
+        chat = Encoding.UTF8.GetString(data, 4 + name_len, chat_len); // 4 + name len의 의미 = 헤더 2개 ( length ushort 2개 + 이전 name의 length )
+
+        this.lobby_chat_act?.Invoke(name, chat);
+    }
+
+    private void Handle_Game_Chat(byte[] data)
+    {
+        string name;
+        string chat;
+        int name_len = BitConverter.ToInt16(data, 0);
+        int chat_len = BitConverter.ToInt16(data, 2 + name_len);
+
+        name = Encoding.UTF8.GetString(data, 2, name_len);
+        chat = Encoding.UTF8.GetString(data, 4 + name_len, chat_len);
+
+        this.game_chat_act?.Invoke(name, chat);
+    }
+
+    private void Handle_Server_BRC(byte[] data)
+    {
+
+    }
     #endregion
 
+    #region 씬 로드 코루틴
+
+    /// <summary> type :  Create  , Join , Exit </summary>
+    private IEnumerator LoadSceneRoutine(PROTOCOL type, byte data)
+    {
+        int scene_idx = type == PROTOCOL.ROOM_EXIT ? 0 : 1;
+
+        AsyncOperation op = SceneManager.LoadSceneAsync(scene_idx);
+        yield return op;
+
+        yield return null; // 구독 이전 액션 실행 방지
+
+        switch (type)
+        {
+            case PROTOCOL.ROOM_CREATE:
+                room_create_act?.Invoke(data);
+                break;
+            case PROTOCOL.ROOM_JOIN:
+                room_join_act?.Invoke(data);
+                break;
+            case PROTOCOL.ROOM_EXIT:
+                room_exit_act?.Invoke(data);
+                break;
+        }
+    }
+
+    #endregion
 }
