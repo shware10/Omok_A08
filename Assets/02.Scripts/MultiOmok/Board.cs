@@ -67,14 +67,14 @@ public class Board
     /* 상, 우상, 우, 우하 4개로 각각 -1을 곱해서 음수로 만들면 반대방향 백터 4개를 또 만들수 있으므로 4개만 선언하였음 */
     private readonly int[,] directions =
     {
-        { 0, 1 },
-        { 1, 1 },
         { 1, 0 },
+        { 1, 1 },
+        { 0, 1 },
         { 1, -1}
     };
 
     /// <summary>
-    /// BoardManager의 현제 행과 열의 상태를 가지고 클래스를 서로 동기화
+    /// OmokManager의 현제 행과 열의 상태를 가지고 클래스를 서로 동기화
     /// </summary>
     public Board(int N)
     {
@@ -211,13 +211,13 @@ public class Board
     }
 
     /// <summary>
-    /// 
+    /// 5목이 되는지의 여부를 검사
     /// </summary>
     /// <param name="row"></param>
     /// <param name="col"></param>
     /// <param name="dRow"></param>
     /// <param name="dCol"></param>
-    /// <returns></returns>
+    /// <returns> 검사한 9개 길이를 반환 </returns>
     private char[] CreateDirectionLine(int row, int col, int dRow, int dCol)
     {
         const int R = 4; // 양쪽 4칸씩 = 총 9칸
@@ -288,7 +288,15 @@ public class Board
         }
         return count;
     }
-
+    /// <summary>
+    /// 열린 33, 44인지 확인
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="col"></param>
+    /// <param name="dRow"></param>
+    /// <param name="dCol"></param>
+    /// <param name="player"></param>
+    /// <returns></returns>
     private bool IsOpenThree(int row, int col, int dRow, int dCol, StoneState player)
     {
         const int R = 4; // 중심 좌우로 4칸 = 총 9칸 검사
@@ -356,7 +364,7 @@ public class Board
             if (line[start + k] != 'B')
                 return false;
 
-        // 양끝이 진짜 빈칸인지(보드 밖 'X'가 아닌지) 확인
+        // 양끝이 빈칸인지(보드 밖 'X'가 아닌지) 확인
         return true;
     }
 

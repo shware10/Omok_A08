@@ -104,6 +104,7 @@ public class OmokManager : MonoBehaviour
             }
         }
 
+
         board.Place(x, y, turn);                    // 보드에 수를 놓으면
         Debug.Log("돌 놓기 완료");
         UpdateLastMarker(x, y);                     // 마지막 착수 지점 마커 업데이트
@@ -141,7 +142,10 @@ public class OmokManager : MonoBehaviour
 
     private void UpdateLastMarker(int x, int y) // 마지막 착수한 돌 위치 마커 생성 
     {
-
+        if (activeLastMarker != null)
+        {
+            Destroy(activeLastMarker);
+        }
         Vector3 worldPos = BoardToWorld(x, y);
         worldPos.z = -2f;
         activeLastMarker = Instantiate(last_Marker, worldPos, boardOriginPoint.rotation);
@@ -173,11 +177,13 @@ public class OmokManager : MonoBehaviour
             }
         }
     }
+    
     private Vector3 BoardToWorld(int x, int y) // World 좌표로 변환
     {
-        float cellSize = 0.5f;
-        Vector3 origin = boardOriginPoint.position;
+        float cellSize = 0.5375f;
+        Vector3 origin = boardOriginPoint.transform.position;
+        Vector3 prefabsPos = new Vector3((y * cellSize) - 0.2625f, (-x * cellSize) + 0.2625f, 0);
 
-        return origin + new Vector3(x * cellSize, y * cellSize, 0);
+        return origin + prefabsPos;
     }
 }
