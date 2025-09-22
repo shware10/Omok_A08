@@ -47,7 +47,7 @@ public class OmokManager : MonoBehaviour
 
     void Start()
     {
-        //delegate 구독
+        // delegate 구독
         var BSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                           .OfType<IBoardStateListener>();
         foreach (var listener in BSListeners) OnBoardChanged += listener.OnBoardChanged;

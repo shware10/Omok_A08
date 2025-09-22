@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Cell : MonoBehaviour,IGameStateListener
+public class Cell : MonoBehaviour
 {
     public int X, Y;
     GameObject whiteStone;

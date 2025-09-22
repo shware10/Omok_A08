@@ -8,7 +8,7 @@ public class Player_AI : MonoBehaviour
 
     void Awake()
     {
-        cellMask = LayerMask.NameToLayer("Cell");
+        cellMask = LayerMask.GetMask("Cell");
     }
 
     public IEnumerator Think(Board_AI board, StoneState me, Action<int,int> OnStone)

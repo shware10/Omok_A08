@@ -9,6 +9,10 @@ public enum PROTOCOL : ushort
     GAME_MOVE_COM,     // 호스트가 수 확정 후 Broad Cast
     GAME_RESULT,       // 호스트가 결과 확인 후 Broad Cast
     GAME_START,        // 호스트가 게임 시작 
+
+    LOBBY_CHAT,        // 로비 채팅
+    ROOM_CHAT,         // 방 채팅
+    SERVER_BRC         // 서버 브로드캐스팅
 }
 
 public enum GameResultState : byte

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class OmokManager_Multi : MonoBehaviour
 {
     public static OmokManager_Multi Instance;
+    [SerializeField] private GameUIController ui_control;   // 변경점
 
     [Header("Board")]
     [SerializeField] public int N = 15;
@@ -43,6 +44,7 @@ public class OmokManager_Multi : MonoBehaviour
     public void SetState(GameState newState)
     {
         curState = newState;
+        ui_control.ShowResultPanel(curState);
         OnStateChanged?.Invoke(curState);
     }
 
@@ -155,9 +157,11 @@ public class OmokManager_Multi : MonoBehaviour
         NetworkManager.Instance.Send_Move_Commit(nextTurnNo, (byte)x, (byte)y, colorByte);
         turnNo = nextTurnNo;
 
+        ui_control.SetCurrentTrunUI(curTurn);       // 변경점
+
         if (board.CheckWin(x, y, curTurn))
         {
-            byte result = (curTurn == StoneState.Black) ? (byte)1 : (byte)0;
+            byte result = (curTurn == StoneState.Black) ? (byte)1 : (byte)2;
             SetState(curTurn == StoneState.Black ? GameState.BlackWin : GameState.WhiteWin);
             //게스트로 브로드 캐스트
             NetworkManager.Instance.Send_Game_Result(result);
@@ -206,6 +210,8 @@ public class OmokManager_Multi : MonoBehaviour
         board.Place(x, y, bcolor == 0 ? StoneState.Black : StoneState.White);
         OnBoardChanged?.Invoke(x, y, bcolor == 0 ? StoneState.Black : StoneState.White);
 
+        ui_control.SetCurrentTrunUI(curTurn);       // 변경점
+
         curTurn = (bcolor == 0) ? StoneState.White : StoneState.Black;
     }
     /// <summary>
@@ -217,6 +223,8 @@ public class OmokManager_Multi : MonoBehaviour
 
         bool randBool = (Random.Range(0, 2) == 0);
         myStone = randBool ? StoneState.Black : StoneState.White;
+
+        ui_control.SetGameStart(myStone); // 변경점
 
         curTurn = StoneState.Black;
         turnNo = 0;
@@ -242,6 +250,8 @@ public class OmokManager_Multi : MonoBehaviour
         bool hostIsBlack = (blackIsHost == 1);
 
         myStone = hostIsBlack ? StoneState.White : StoneState.Black; //호스트가 블랙이면 나는 화이트
+
+        ui_control.SetGameStart(myStone); // 변경점
 
         curTurn = StoneState.Black;
         turnNo = 0;
