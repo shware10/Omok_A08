@@ -80,8 +80,8 @@ public class UIManager_AI : MonoBehaviour, ITurnStateListener, IGameStateListene
     void OnStoneClicked(StoneState stone)
     {
         OnStoneSelected?.Invoke(stone);
-        player_text_black.text = stone == StoneState.Black ? "나" : "상대방";
-        player_text_white.text = stone == StoneState.Black ? "상대방" : "나";
+        player_text_black.text = stone == StoneState.Black ? "나" : "AI";
+        player_text_white.text = stone == StoneState.Black ? "AI" : "나";
         ActivateCG(stoneCG, false);
         ActivateCG(difficultyCG, true);
     }
