@@ -150,6 +150,8 @@ public class OmokManager_Multi : MonoBehaviour
         Debug.Log("돌 놓기 완료");
         OnBoardChanged?.Invoke(x, y, curTurn);         // 보드 뷰 업데이트
         board.ShowBoard();
+        UpdateLastMarker(x, y);
+
 
         //브로드 캐스트
         ushort nextTurnNo = (ushort)(turnNo + 1);
@@ -178,6 +180,7 @@ public class OmokManager_Multi : MonoBehaviour
         }
 
         curTurn = curTurn == StoneState.Black ? StoneState.White : StoneState.Black;
+        UpdateForbiddenMarkers();
     }
 
     void OnGameResult(byte result)
@@ -211,8 +214,10 @@ public class OmokManager_Multi : MonoBehaviour
         OnBoardChanged?.Invoke(x, y, bcolor == 0 ? StoneState.Black : StoneState.White);
 
         ui_control.SetCurrentTrunUI(curTurn);       // 변경점
+        UpdateLastMarker(x, y);
 
         curTurn = (bcolor == 0) ? StoneState.White : StoneState.Black;
+        UpdateForbiddenMarkers();
     }
     /// <summary>
     /// 서버에 송신 호스트에서만 실행
@@ -262,7 +267,7 @@ public class OmokManager_Multi : MonoBehaviour
         Debug.Log("게스트도 게임을 시작");
     }
 
-//---------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------
 
     private void UpdateLastMarker(int x, int y) // 마지막 착수한 돌 위치 마커 생성 
     {
@@ -293,7 +298,7 @@ public class OmokManager_Multi : MonoBehaviour
                 if (board.IsEmpty(i, j) && board.IsForbiddenMove(i, j))
                 {
                     Vector3 worldPos = BoardToWorld(i, j);
-                    worldPos.y -= 2f;
+                    worldPos.z -= 2f;
                     GameObject marerInstance = Instantiate(x_Marker, worldPos, Quaternion.identity);
                     activeXMarkers.Add(marerInstance);
                 }
