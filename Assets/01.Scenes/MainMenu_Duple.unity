@@ -4181,8 +4181,6 @@ MonoBehaviour:
   SignUpCanvas: {fileID: 817443333}
   StoreCanvas: {fileID: 486322006}
   LobbyCanvas: {fileID: 1809519442}
-  panel_playerinfo: {fileID: 528932847}
-  user_name: {fileID: 1689484236}
   LoginUsername: {fileID: 2087940763}
   LoginPassword: {fileID: 924720108}
   SignUpUsername: {fileID: 1834783937}
@@ -9537,15 +9535,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Match: {fileID: 1262634567}
+  NewRoom: {fileID: 1433226764}
+  AIMatch: {fileID: 0}
   MatchProfile: {fileID: 22656248633475711, guid: e4fc7bce6b3231849bdc9be372782117, type: 3}
   Content: {fileID: 1262634567}
-  NewRoom: {fileID: 1433226764}
   Title: {fileID: 287263542}
-  AI_play_Btn: {fileID: 1262350356}
-  input_field: {fileID: 2092946245}
-  chat_content_tf: {fileID: 1630213074}
-  chat_confirm_btn: {fileID: 940460191}
-  text_box_prefab: {fileID: 7628742870114319683, guid: 72f5f99f7163910499d64109b8d49b1f, type: 3}
 --- !u!1 &1815983636
 GameObject:
   m_ObjectHideFlags: 0
