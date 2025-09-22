@@ -93,28 +93,6 @@ public class NetworkManager : Singleton<NetworkManager>
             }
         }
 
-        // #region 테스트 인풋
-        // if (Input.GetKeyDown(KeyCode.A))
-        // {
-        //     Send_Room_Crate("test01");
-        // }
-        // else if (Input.GetKeyDown(KeyCode.S))
-        // {
-        //     Send_Room_Join(41);
-        // }
-
-        // if (Input.GetKeyDown(KeyCode.Q))
-        // {
-        //     this.player_name = "bi_do";
-        // }
-
-        // if (Input.GetKeyDown(KeyCode.D))
-        // {
-        //     Disconnect();
-        // }
-
-        // #endregion
-
     }
 
 

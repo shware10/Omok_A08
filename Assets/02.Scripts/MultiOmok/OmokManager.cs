@@ -47,10 +47,10 @@ public class OmokManager : MonoBehaviour
 
     void Start()
     {
-        //delegate 구독
+        // delegate 구독
         var BSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                           .OfType<IBoardStateListener>();
-        foreach(var listener in BSListeners) OnBoardChanged += listener.OnBoardChanged;
+        foreach (var listener in BSListeners) OnBoardChanged += listener.OnBoardChanged;
 
         var GSListeners = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None)
                           .OfType<IGameStateListener>();
@@ -63,7 +63,7 @@ public class OmokManager : MonoBehaviour
 
     void Update()
     {
-        if(curState == GameState.None)
+        if (curState == GameState.None)
         {
             if (Input.GetMouseButtonDown(0)) TryPlace();
         }
@@ -104,6 +104,7 @@ public class OmokManager : MonoBehaviour
             }
         }
 
+
         board.Place(x, y, turn);                    // 보드에 수를 놓으면
         Debug.Log("돌 놓기 완료");
         UpdateLastMarker(x, y);                     // 마지막 착수 지점 마커 업데이트
@@ -141,9 +142,13 @@ public class OmokManager : MonoBehaviour
 
     private void UpdateLastMarker(int x, int y) // 마지막 착수한 돌 위치 마커 생성 
     {
+        if (activeLastMarker != null)
+        {
+            Destroy(activeLastMarker);
+        }
         Vector3 worldPos = BoardToWorld(x, y);
-        worldPos.y -= 2f;
-        activeLastMarker = Instantiate(last_Marker, worldPos, Quaternion.identity);
+        worldPos.z = -2f;
+        activeLastMarker = Instantiate(last_Marker, worldPos, boardOriginPoint.rotation);
     }
 
     private void UpdateForbiddenMarkers() // 흑돌 금수 위치 마커 생성 
@@ -157,6 +162,7 @@ public class OmokManager : MonoBehaviour
         if (turn != StoneState.Black)
             return;
 
+        /* 15x15 좌표에 금수로 지정될 부분에 전부 금수 마커 생성 */
         for (int i = 0; i < N; i++)
         {
             for (int j = 0; j < N; j++)
@@ -164,18 +170,20 @@ public class OmokManager : MonoBehaviour
                 if (board.IsEmpty(i, j) && board.IsForbiddenMove(i, j))
                 {
                     Vector3 worldPos = BoardToWorld(i, j);
-                    worldPos.y -= 2f;
-                    GameObject marerInstance = Instantiate(x_Marker, worldPos, Quaternion.identity);
-                    activeXMarkers.Add(marerInstance);
+                    worldPos.z = -2f;
+                    GameObject markerInstance = Instantiate(x_Marker, worldPos, boardOriginPoint.rotation);
+                    activeXMarkers.Add(markerInstance);
                 }
             }
         }
     }
+    
     private Vector3 BoardToWorld(int x, int y) // World 좌표로 변환
     {
-        float cellSize = 1f;
-        Vector3 origin = Vector3.zero;
+        float cellSize = 0.5375f;
+        Vector3 origin = boardOriginPoint.transform.position;
+        Vector3 prefabsPos = new Vector3((y * cellSize) - 0.2625f, (-x * cellSize) + 0.2625f, 0);
 
-        return origin + new Vector3(x *  cellSize, 0, y * cellSize);
+        return origin + prefabsPos;
     }
 }
